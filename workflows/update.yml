@@ -1,0 +1,63 @@
+name: Update rankings data
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["index.html", "scripts/**", ".github/workflows/**"]
+  schedule:
+    - cron: "0 11 * * *"     # every morning
+    - cron: "0 16-23 * * 6"  # Saturday afternoon and evening (UTC)
+    - cron: "0 0-8 * * 0"    # late Saturday games (early Sunday UTC)
+    - cron: "30 19 * * 0"    # after the AP poll is released (about 2 p.m. ET Sunday)
+    - cron: "30 22 * * 0"    # second try in case the poll posts late
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch latest results and AP poll
+        env:
+          CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+          SEASON: ${{ vars.SEASON }}
+        run: python scripts/build_data.py
+
+      - name: Commit data.json if it changed
+        run: |
+          if git diff --quiet -- data.json; then
+            echo "No data changes."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data.json
+            git commit -m "Update data $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
+
+      - name: Stage site
+        run: mkdir -p _site && cp index.html data.json _site/
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
