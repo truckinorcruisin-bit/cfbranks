@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Résumé Rank — 2026 college football</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1EC; --surface:#FFFFFF; --ink:#13223A; --muted:#5C6878; --rule:#D3D9D1;
+  --turf:#2E6B3C; --turf-2:#4E8F5C; --turf-3:#8DBB93; --gold:#B8860B; --loss:#A63A2C; --fcs:#9AA3AD;
+  --row-hover:#F6F8F4;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1A14; --surface:#16231B; --ink:#E7EDE6; --muted:#9AA79D; --rule:#2B3A30;
+    --turf:#6FBF7F; --turf-2:#4E9A5E; --turf-3:#2F6B3C; --gold:#E2B54A; --loss:#E07A68; --fcs:#5E6A63;
+    --row-hover:#1B2A21; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1A14; --surface:#16231B; --ink:#E7EDE6; --muted:#9AA79D; --rule:#2B3A30;
+  --turf:#6FBF7F; --turf-2:#4E9A5E; --turf-3:#2F6B3C; --gold:#E2B54A; --loss:#E07A68; --fcs:#5E6A63;
+  --row-hover:#1B2A21; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums}
+.wrap{max-width:860px;margin:0 auto;padding:28px 16px 64px}
+header h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;font-size:clamp(2.6rem,9vw,4.4rem);line-height:.92;letter-spacing:-.01em;margin:0}
+header h1 span{display:block;font-weight:600;font-size:.42em;letter-spacing:0;color:var(--muted);margin-top:.35em}
+.rule-line{margin:18px 0 0;max-width:62ch;color:var(--ink)}
+.rule-line b{font-weight:600}
+.asof{color:var(--muted);font-size:.9rem;margin:6px 0 0}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;margin:22px 0 0;border-bottom:2px solid var(--ink)}
+.tabs button{font:inherit;font-weight:600;color:var(--muted);background:transparent;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:10px 14px;min-height:44px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--turf)}
+.cmp-pick{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:20px 0 14px}
+.cmp-pick label{flex:1 1 150px;display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted)}
+.cmp-pick select,.cmp-pick button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:44px}
+.cmp-pick button{cursor:pointer;flex:0 0 auto;font-weight:600}
+.cmp-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cmp-card{background:var(--surface);border:1px solid var(--rule);border-top:4px solid var(--turf);border-radius:6px;padding:12px 14px}
+.cmp-card.b{border-top-color:var(--gold)}
+.cmp-card h3{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.7rem;line-height:1;margin:0 0 4px}
+.cmp-card p{margin:2px 0;font-size:.88rem;color:var(--muted)}
+.cmp-card p b{color:var(--ink);font-weight:600}
+.cmp-sum{margin:6px 0 14px;font-weight:600}
+.cmp-note{color:var(--muted);font-size:.88rem;margin:0 0 8px}
+table.cmp{background:var(--surface);margin-bottom:22px}
+table.cmp th,table.cmp td{padding:8px 10px}
+table.cmp tr.grp th{background:var(--bg);color:var(--ink);font-size:.8rem;font-weight:600;padding-top:12px}
+table.cmp tr.avg td,table.cmp tr.avg th{border-top:2px solid var(--ink);font-weight:600;color:var(--ink)}
+table.cmp td small{display:block;color:var(--muted);font-size:.78rem;font-weight:400}
+table.cmp td.best{color:var(--turf);font-weight:700}
+.cmp h4,.cmp-h{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.3rem;margin:18px 0 6px}
+.h2h{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;margin:0 0 6px}
+.mv-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.mv-cols{grid-template-columns:1fr}.cmp-cards{grid-template-columns:1fr 1fr}}
+ol.mv{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--rule);border-radius:6px}
+ol.mv li{display:grid;grid-template-columns:1fr auto 3.6rem;gap:8px;align-items:baseline;padding:8px 12px;border-bottom:1px solid var(--rule);background:transparent}
+ol.mv li:last-child{border-bottom:0}
+.mv-team{font-weight:600}
+.mv-rank{color:var(--muted);font-size:.88rem}
+.mv-d{text-align:right;font-weight:700}
+.mv-d.up{color:var(--turf)} .mv-d.dn{color:var(--loss)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 10px}
+.controls input,.controls select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:42px}
+.controls input{flex:1 1 200px}
+.controls select{flex:0 1 230px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.colhead{display:grid;grid-template-columns:3.2rem 1fr 4.6rem;gap:12px;padding:8px 14px;color:var(--muted);font-size:.8rem;border-bottom:2px solid var(--ink)}
+.colhead .r{text-align:right}
+ol{list-style:none;margin:0;padding:0}
+li{border-bottom:1px solid var(--rule);background:var(--surface)}
+.row{all:unset;box-sizing:border-box;display:grid;grid-template-columns:3.2rem 1fr 4.6rem;gap:4px 12px;align-items:center;width:100%;padding:12px 14px;cursor:pointer}
+.row:hover{background:var(--row-hover)}
+.row:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+.rank{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.9rem;line-height:1;grid-row:span 2}
+.rank.t{font-size:1.5rem}
+.team{font-weight:600;font-size:1.05rem;line-height:1.2}
+.team small{font-weight:400;color:var(--muted);font-size:.85rem;margin-left:6px;white-space:nowrap}
+.score{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.6rem;text-align:right;grid-row:span 2;line-height:1}
+.bar{display:flex;height:10px;border-radius:2px;overflow:hidden;background:transparent;gap:2px}
+.bar i{display:block;height:100%}
+.bar i:nth-child(3n+1){background:var(--turf)}
+.bar i:nth-child(3n+2){background:var(--turf-2)}
+.bar i:nth-child(3n){background:var(--turf-3)}
+.detail{display:none;padding:2px 14px 16px calc(3.2rem + 26px)}
+li.open .detail{display:block}
+li.open{background:var(--row-hover)}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:.78rem;padding:4px 6px;border-bottom:1px solid var(--rule)}
+td{padding:6px 6px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap}
+tr.l td{color:var(--loss)}
+tr.f td{color:var(--fcs)}
+td .res{font-weight:600}
+.tablebox{overflow-x:auto}
+.sosline{margin:2px 0 8px;color:var(--muted);font-size:.9rem}
+.empty{padding:28px 14px;color:var(--muted);background:var(--surface)}
+.how{margin-top:40px;max-width:66ch;color:var(--muted);font-size:.92rem}
+.how h2{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.4rem;color:var(--ink);margin:0 0 6px}
+.how p{margin:0 0 10px}
+@media (max-width:560px){
+  .colhead,.row{grid-template-columns:2.4rem 1fr 3.8rem}
+  .rank{font-size:1.5rem}.rank.t{font-size:1.2rem}
+  .detail{padding-left:14px}
+  .team small{display:block;margin:2px 0 0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .bar i{transform-origin:left;animation:grow .6s ease-out both}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Résumé Rank<span>2026 FBS teams ranked by who they beat</span></h1>
+  <p class="rule-line" id="rule">Every win over an FBS team is worth more or less depending on how good the beaten team’s own wins were, and how good <i>those</i> teams’ wins were, all the way down. A win over an average team is worth 1.0. FCS games don’t count for anyone.</p>
+  <p class="asof" id="asof"></p>
+</header>
+<div class="tabs" role="tablist" aria-label="View">
+  <button id="tabR" role="tab" aria-selected="true">Rankings</button>
+  <button id="tabC" role="tab" aria-selected="false">Compare</button>
+  <button id="tabM" role="tab" aria-selected="false">Movers</button>
+</div>
+<div id="viewR">
+<div class="controls">
+  <input id="q" type="search" placeholder="Find a team" aria-label="Find a team">
+  <select id="conf" aria-label="Filter by conference"><option value="">All conferences</option></select>
+  <select id="method" aria-label="Scoring method"><option value="rec">Method: recursive</option><option value="cnt">Method: opponent wins + schedule</option><option value="elo">Method: Elo ratings</option><option value="mine">Method: My rank</option></select>
+  <select id="sos" aria-label="Weight"></select>
+</div>
+<div class="colhead" aria-hidden="true"><span>Rank</span><span>Team, FBS record, and the wins that built the score</span><span class="r" id="ch3">Points</span></div>
+<ol id="list"></ol>
+</div>
+<div id="viewC" hidden>
+  <div class="cmp-pick">
+    <label>Team A<select id="ca"></select></label>
+    <button id="cswap" aria-label="Swap teams">Swap</button>
+    <label>Team B<select id="cb"></select></label>
+  </div>
+  <div id="cmpOut"></div>
+</div>
+<div id="viewM" hidden>
+  <div class="cmp-pick">
+    <label>System<select id="msys"></select></label>
+    <label>From<select id="mfrom"></select></label>
+    <label>To<select id="mto"></select></label>
+    <label>Teams<select id="mscope"><option value="top25">Top 25 at either point</option><option value="all">All FBS teams</option></select></label>
+  </div>
+  <div id="movOut"></div>
+</div>
+<section class="how">
+  <h2>How the points work</h2>
+  <p><b>Recursive (default).</b> A win over an FBS team earns a flat base credit plus a bonus tied to that team’s own score. That score is built the same way, from the wins it earned over other teams, and so on. The calculation repeats until the numbers stop changing, so a 5-2 record built on weak opponents ends up worth much less than a 5-2 record built on strong ones. An average opponent is worth 1.0 per win. The quality weight sets how much of each win comes from the opponent’s score instead of the flat credit.</p>
+  <p><b>Opponent wins + schedule.</b> A win is worth the beaten team’s FBS win total, multiplied by the average FBS win percentage of its opponents relative to the national average. The schedule weight scales that multiplier toward 1.00 (half) or removes it (off).</p>
+  <p><b>Elo.</b> Every team starts at 1500 and trades rating points after each FBS game, in date order. Before kickoff, the rating gap sets a win probability (a 400-point gap is about 10-to-1, and the home team gets a 55-point boost). The winner then takes 32 times the chance it had of losing: an upset moves ratings a lot, an expected win barely moves them. The margin of victory option scales each swing by the size of the win (capped at 35 points, and damped when a favorite wins big). There are no preseason ratings, so this is a pure in-season rating. The bar shows rating points gained from wins.</p>
+  <p><b>My rank.</b> Uses opponents’ <i>current</i> AP rank (the latest poll in the data), not their rank when played. <b>Wins:</b> +2 over a top-15 team. Otherwise +1 if the opponent has two or more wins over teams with winning records (“quality wins”), or +0.5 if the opponent has a winning record but fewer than two. <b>Close wins:</b> a win by 8 or fewer over a team outside the top 40 costs 0.5, on top of any win credit. <b>Losses:</b> +0.5 for losing by 8 or fewer to a top-10 team, −1 for losing to a team ranked 21 to 40, and −1.5 for losing to a team outside the top 40. Other losses score nothing. A winning record means above .500 in FBS games. The AP poll names only 25 teams. Teams receiving votes, when the data includes them, rank next by vote total, and the remaining spots through 40 are filled in by Elo rating. The menu can limit quality wins to opponents from the SEC, Big Ten, Big 12, ACC or Notre Dame. The bar shows points earned before deductions.</p>
+  <p id="apline"></p>
+  <p>Games against FCS opponents are removed everywhere. A team that is 4-3 with one FCS win counts as 3-3 here, and a win over an FCS team earns nothing. Losses add nothing directly.</p>
+  <p>The Movers tab replays the season one week at a time, scoring each system with only the games played so far (and, for My rank, the AP poll released after that week), then shows who rose and fell the most.</p>
+  <p>Tap a team to see each game and what it earned. Ties in points are broken by fewer FBS losses, then name. Results come from CollegeFootballData.com and include every completed game through the date above.</p>
+</section>
+</div>
+<script>
+const DATA = 
+null;
+function startApp(DATA){
+  const fbs = DATA.conf;
+  const T = {};
+  let last = '', avgSOS = 1, maxWeek = Infinity;
+  const latestWeek = Math.max(...DATA.games.map(g=>g[0]));
+  function buildTeams(W){
+    maxWeek = W;
+    for (const k in T) delete T[k];
+    for (const t in fbs) T[t] = {name:t, conf:fbs[t], fW:0, fL:0, aW:0, aL:0, games:[], opps:[], pts:0, wins:[], sos:0};
+    last = '';
+    for (let gi=0; gi<DATA.games.length; gi++){
+      const g = DATA.games[gi];
+      const [wk,date,h,hp,a,ap,hF,aF,neu] = g;
+      if (wk > W) continue;
+      if (date > last) last = date;
+      const homeWon = hp > ap;
+      const bothFBS = hF && aF;
+      const sides = [[h,hp,a,ap,aF,homeWon,'vs'],[a,ap,h,hp,hF,!homeWon,'@']];
+      for (const [me,mp,op,opp,opFBS,won,loc] of sides){
+        if (!T[me]) continue;
+        if (won) T[me].aW++; else T[me].aL++;
+        if (bothFBS){ if (won) T[me].fW++; else T[me].fL++; T[me].opps.push(op); }
+        T[me].games.push({gi,wk,date,op,mp,opp,won,fcs:!opFBS,loc});
+      }
+    }
+    const pct = t => (t.fW+t.fL) ? t.fW/(t.fW+t.fL) : 0;
+    let sosSum = 0, sosN = 0;
+    for (const t of Object.values(T)){
+      if (t.opps.length){ t.sos = t.opps.reduce((s,o)=>s+pct(T[o]),0)/t.opps.length; sosSum += t.sos; sosN++; }
+      t.games.sort((x,y)=> x.date < y.date ? -1 : x.date > y.date ? 1 : x.gi - y.gi);
+    }
+    avgSOS = sosN ? sosSum/sosN : 1;
+    for (const t of Object.values(T)) t.mult = t.opps.length && avgSOS ? t.sos/avgSOS : 1;
+  }
+  buildTeams(Infinity);
+
+  const POLLS = DATA.ap || {};
+  const pollWeeks = Object.keys(POLLS).map(Number).sort((x,y)=>x-y);
+  function pollFor(W){
+    let k = null;
+    for (const w of pollWeeks) if (w <= W+1) k = w;
+    return k === null ? {top:[], votes:[], week:null} : {top:POLLS[k].top || [], votes:POLLS[k].votes || [], week:k};
+  }
+  let AP = pollFor(latestWeek);
+  const isPower = v => ['SEC','Big Ten','Big 12','ACC'].includes(v.conf) || v.name === 'Notre Dame';
+  let all = [];
+  const eq = (x,y)=> Math.abs(x.pts-y.pts) < 1e-9;
+  let method = 'rec', weight = 0.7, mean = 1;
+  const S = {};
+  function solveRec(){
+    const teams = Object.values(T), a = 1 - weight;
+    for (const t of teams) S[t.name] = t.fW;
+    for (let it=0; it<1000; it++){
+      let m = 0; for (const t of teams) m += S[t.name]; m /= teams.length; mean = m || 1;
+      const N = {}; let diff = 0;
+      for (const t of teams){
+        let s = 0;
+        for (const g of t.games) if (g.won && !g.fcs) s += a + weight*S[g.op]/mean;
+        N[t.name] = s; diff += Math.abs(s - S[t.name]);
+      }
+      for (const k in N) S[k] = N[k];
+      if (diff < 1e-10) break;
+    }
+    let m = 0; for (const t of teams) m += S[t.name]; mean = (m/teams.length) || 1;
+  }
+  const K_ELO = 32, HFA = 55, E = {};
+  function solveElo(){
+    const R = {};
+    for (const n in T){ R[n] = 1500; E[n] = {}; }
+    const order = [];
+    DATA.games.forEach((g,gi)=>{ if (g[6] && g[7] && g[0] <= maxWeek) order.push(gi); });
+    order.sort((x,y)=> DATA.games[x][1] < DATA.games[y][1] ? -1 : DATA.games[x][1] > DATA.games[y][1] ? 1 : x-y);
+    for (const gi of order){
+      const [wk,date,h,hp,a,ap,hF,aF,neu] = DATA.games[gi];
+      const adj = neu ? 0 : HFA;
+      const eh = 1/(1+Math.pow(10, -((R[h]+adj)-R[a])/400));
+      const hw = hp > ap;
+      const winner = hw ? h : a, loser = hw ? a : h;
+      const diffW = hw ? (R[h]+adj)-R[a] : R[a]-(R[h]+adj);
+      let mult = 1;
+      if (weight === 1){
+        const mov = Math.min(Math.abs(hp-ap), 35);
+        mult = Math.log(mov+1)/Math.log(11) * 2.2/(diffW*0.001+2.2);
+      }
+      const pw = hw ? eh : 1-eh;
+      const d = K_ELO*mult*(1-pw);
+      E[h][gi] = {pre:R[h], opp:R[a], p:eh, d: hw ? d : -d};
+      E[a][gi] = {pre:R[a], opp:R[h], p:1-eh, d: hw ? -d : d};
+      R[winner] += d; R[loser] -= d;
+    }
+    return R;
+  }
+  function buildAP(){
+    const rk = {};
+    AP.top.forEach((n,i)=>{ rk[n] = i+1; });
+    AP.votes.forEach((v,i)=>{ rk[v[0]] = 26+i; });
+    let n = Object.keys(rk).length;
+    const sv = weight; weight = 0; const R2 = solveElo(); weight = sv;
+    const rest = Object.keys(T).filter(x=>!(x in rk)).sort((x,y)=>R2[y]-R2[x]);
+    for (let i=0; n<40 && i<rest.length; i++, n++) rk[rest[i]] = n+1;
+    return rk;
+  }
+  function score(){
+    let R = null, apRank = null, qw = null;
+    if (method === 'rec') solveRec();
+    if (method === 'elo') R = solveElo();
+    if (method === 'mine'){
+      apRank = buildAP();
+      qw = {};
+      for (const t of Object.values(T)){
+        qw[t.name] = t.games.filter(g=>g.won && !g.fcs && T[g.op].fW > T[g.op].fL && (weight === 0 || isPower(T[g.op]))).length;
+      }
+    }
+    for (const t of Object.values(T)){
+      t.pts = 0; t.wins = [];
+      for (const g of t.games){
+        if (g.fcs) continue;
+        const o = T[g.op];
+        g.oW = o.fW; g.oL = o.fL;
+        if (method === 'mine'){
+          const r = apRank[g.op], margin = Math.abs(g.mp-g.opp);
+          let p = 0; const why = [];
+          if (g.won){
+            if (r <= 15){ p += 2; why.push('Top-15 win'); }
+            else if (qw[g.op] >= 2){ p += 1; why.push('Opp. has 2+ quality wins'); }
+            else if (o.fW > o.fL){ p += 0.5; why.push('Winning-record opp.'); }
+            if (margin <= 8 && !r){ p -= 0.5; why.push('Close win vs. team outside top 40'); }
+          } else {
+            if (r <= 10 && margin <= 8){ p += 0.5; why.push('Close loss to top-10 team'); }
+            else if (!r){ p -= 1.5; why.push('Loss to team outside top 40'); }
+            else if (r > 20){ p -= 1; why.push('Loss to team ranked 21-40'); }
+          }
+          g.net = p; g.why = why.join('; ') || 'No points'; g.apr = r;
+          g.val = Math.max(p,0); t.pts += p;
+          if (p > 0) t.wins.push(g);
+          continue;
+        }
+        if (method === 'elo'){
+          const e = E[t.name][g.gi];
+          g.eo = e.opp; g.ep = e.p; g.ed = e.d;
+          g.worth = Math.max(e.d,0);
+        } else if (method === 'rec'){
+          g.oS = S[g.op];
+          g.worth = (1-weight) + weight*S[g.op]/mean;
+        } else {
+          g.m = 1 + weight*(o.mult-1);
+          g.worth = o.fW*g.m;
+        }
+        g.val = g.won ? g.worth : 0;
+        if (g.won){ t.pts += g.val; t.wins.push(g); }
+      }
+      t.gain = method === 'mine' ? t.wins.reduce((s,g)=>s+g.val,0) : t.pts;
+      if (method === 'elo') t.pts = R[t.name];
+      if (method === 'mine'){ t.apr = apRank[t.name]; t.qw = qw[t.name]; }
+      t.wins.sort((x,y)=> y.val - x.val);
+      t.worth = (method === 'elo' || method === 'mine') ? 0 : method === 'rec' ? (1-weight) + weight*S[t.name]/mean : t.fW*(1+weight*(t.mult-1));
+    }
+    all = Object.values(T).sort((x,y)=> (y.pts-x.pts) || (x.fL-y.fL) || x.name.localeCompare(y.name));
+    all.forEach((t,i)=>{ t.rank = (i>0 && eq(t,all[i-1])) ? all[i-1].rank : i+1; });
+    all.forEach((t,i)=>{ t.tied = (i>0 && eq(t,all[i-1])) || (i<all.length-1 && eq(t,all[i+1])); });
+  }
+
+  const d = new Date(last+'T12:00:00Z');
+  document.getElementById('asof').textContent = 'Results through ' + d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'}) + ' for ' + Object.keys(T).length + ' FBS teams' + (AP.week !== null ? ', AP poll entering week ' + AP.week : '');
+
+  const confSel = document.getElementById('conf');
+  [...new Set(Object.values(T).map(t=>t.conf))].sort().forEach(c=>{
+    const o = document.createElement('option'); o.value = c; o.textContent = c; confSel.appendChild(o);
+  });
+
+  const esc = s => s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const f1 = n => n.toFixed(1);
+  const f2 = n => n.toFixed(2);
+  const fmtDate = s => new Date(s+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'});
+
+  function detail(t){
+    let rows = '';
+    const rec = method === 'rec', elo = method === 'elo', mine = method === 'mine';
+    for (const g of t.games){
+      const cls = g.fcs ? 'f' : (mine ? (g.net<0?'l':'') : (g.won?'':'l'));
+      const res = (g.won?'W ':'L ') + g.mp + '–' + g.opp;
+      let c1, c2, pts;
+      if (g.fcs){ c1 = 'FCS'; c2 = ''; pts = 'Not counted'; }
+      else if (mine){ c1 = g.apr ? (g.apr<=25 ? '#'+g.apr : '~'+g.apr) : '40+'; c2 = esc(g.why); pts = (g.net>0?'+':g.net<0?'−':'') + Math.abs(g.net).toFixed(1); }
+      else if (elo){ c1 = Math.round(g.eo); c2 = Math.round(g.ep*100) + '%'; pts = (g.ed>=0?'+':'−') + Math.abs(g.ed).toFixed(1); }
+      else { c1 = rec ? g.oW + '-' + g.oL : g.oW; c2 = rec ? f1(g.oS) : '×' + f2(g.m); pts = g.won ? '+' + f2(g.val) : '—'; }
+      rows += `<tr class="${cls}"><td>${fmtDate(g.date)}</td><td>${g.loc==='@'?'at ':''}${esc(g.op)}</td><td class="n"><span class="res">${res}</span></td><td class="n">${c1}</td><td${mine?'':' class="n"'}>${c2}</td><td class="n">${pts}</td></tr>`;
+    }
+    const line = mine
+      ? `${t.apr ? (t.apr<=25 ? 'AP rank #'+t.apr : 'Rank ~'+t.apr+' by votes or Elo, outside the AP 25') : 'Outside the top 40'}. ${t.qw} quality win${t.qw===1?'':'s'} (wins over teams with winning records${weight===1?', power conferences only':''}). Opponent ranks are from the current AP poll.`
+      : elo
+      ? `Current rating ${Math.round(t.pts)}, up or down from a 1500 start. Opponent rating and win probability are as of kickoff.`
+      : rec
+      ? `A win over this team is worth ${f2(t.worth)} points (an average team is worth 1.00). Its own score is ${f1(S[t.name])}.`
+      : `Schedule strength is ${f2(t.mult)} of the national average, so a win over this team is worth ${f2(t.worth/Math.max(t.fW,1))}× its win total.`;
+    const h1 = mine ? 'Opp. AP' : elo ? 'Opp. rating' : rec ? 'Opp. FBS record' : 'Opp. wins';
+    const h2 = mine ? 'Reason' : elo ? 'Win prob.' : rec ? 'Opp. score' : 'Sched.';
+    const h3 = elo ? 'Change' : 'Points';
+    return `<p class="sosline">${line}</p><div class="tablebox"><table><thead><tr><th>Date</th><th>Opponent</th><th class="n">Result</th><th class="n">${h1}</th><th${mine?'':' class="n"'}>${h2}</th><th class="n">${h3}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  const RULES = {
+    rec:'Every win over an FBS team is worth more or less depending on how good the beaten team’s own wins were, and how good <i>those</i> teams’ wins were, all the way down. A win over an average team is worth 1.0. FCS games don’t count for anyone.',
+    cnt:'Every win over an FBS team is worth the number of <b>FBS wins</b> that opponent has, multiplied by how tough that opponent’s schedule was. FCS games don’t count for anyone.',
+    mine:'Points for beating the AP top 15 and teams with real resumes, a little credit for close losses to top-10 teams, and deductions for close wins over, and losses to, teams the AP poll doesn’t rate. FCS games don’t count for anyone.',
+    elo:'Every team starts at 1500 and trades rating points after each FBS game. Beating a strong team moves you up more than beating a weak one, and losing to a weak team costs you more. FCS games don’t count for anyone.'
+  };
+  document.getElementById('apline').textContent = (AP.week === null ? 'No AP poll in the data yet.' : 'AP poll used (entering week ' + AP.week + '): ') + AP.top.map((n,i)=>(i+1)+' '+n).join(', ') + (AP.votes.length ? '. Others receiving votes: ' + AP.votes.map(v=>v[0]+' '+v[1]).join(', ') : '') + '.';
+  const list = document.getElementById('list');
+  const openSet = new Set();
+  function render(){
+    score();
+    const maxPts = all[0].pts || 1;
+    const barMax = (method === 'elo' || method === 'mine') ? (Math.max(...all.map(t=>t.gain)) || 1) : maxPts;
+    document.getElementById('ch3').textContent = method === 'elo' ? 'Rating' : 'Points';
+    document.getElementById('rule').innerHTML = RULES[method];
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    const c = confSel.value;
+    const shown = all.filter(t => (!c || t.conf===c) && (!q || t.name.toLowerCase().includes(q)));
+    if (!shown.length){ list.innerHTML = '<li class="empty">No team matches that search. Clear the search or pick another conference.</li>'; return; }
+    list.innerHTML = shown.map(t=>{
+      const segs = t.wins.map(g=>`<i style="width:${(g.val/barMax*100).toFixed(2)}%" title="${esc(g.op)} (${g.oW}-${g.oL}) +${method==='elo'?g.val.toFixed(1):f2(g.val)}"></i>`).join('');
+      const record = t.fW + '-' + t.fL + ' FBS' + ((t.aW+t.aL)!==(t.fW+t.fL) ? ', ' + t.aW + '-' + t.aL + ' overall' : '');
+      const isOpen = openSet.has(t.name);
+      return `<li data-t="${esc(t.name)}"${isOpen?' class="open"':''}><button class="row" aria-expanded="${isOpen}">
+        <span class="rank${t.tied?' t':''}">${t.tied?'T':''}${t.rank}</span>
+        <span class="team">${esc(t.name)}<small>${esc(t.conf)}, ${record}</small></span>
+        <span class="score">${method==='elo'?Math.round(t.pts):f1(t.pts)}</span>
+        <span class="bar" aria-hidden="true">${segs}</span>
+      </button><div class="detail">${isOpen?detail(t):''}</div></li>`;
+    }).join('');
+  }
+  list.addEventListener('click', e=>{
+    const btn = e.target.closest('.row'); if (!btn) return;
+    const li = btn.parentElement; const open = !li.classList.contains('open');
+    li.classList.toggle('open', open); btn.setAttribute('aria-expanded', open);
+    const name = li.dataset.t;
+    if (open){ openSet.add(name); const det = li.querySelector('.detail'); if (!det.innerHTML) det.innerHTML = detail(T[name]); }
+    else openSet.delete(name);
+  });
+  document.getElementById('q').addEventListener('input', render);
+  confSel.addEventListener('change', render);
+  const sosSel = document.getElementById('sos');
+  const opts = {
+    rec:[['0.7','Quality weight: 70%'],['0.85','Quality weight: 85%'],['0.5','Quality weight: 50%']],
+    cnt:[['1','Schedule weight: full'],['0.5','Schedule weight: half'],['0','Schedule weight: off']],
+    elo:[['0','Wins only'],['1','Margin of victory counts']],
+    mine:[['0','Quality wins: any conference'],['1','Quality wins: power conferences only']]
+  };
+  function fillWeights(){
+    sosSel.innerHTML = opts[method].map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');
+    weight = parseFloat(opts[method][0][0]);
+  }
+  document.getElementById('method').addEventListener('change', e=>{ method = e.target.value; fillWeights(); render(); });
+  sosSel.addEventListener('change', e=>{ weight = parseFloat(e.target.value); render(); });
+  fillWeights();
+  // ---- Weekly history for the movers tracker ----
+  const SYS = [
+    {k:'rec', w:0.7, l:'Recursive (70% quality weight)'},
+    {k:'cnt', w:1, l:'Opponent wins + schedule'},
+    {k:'elo', w:0, l:'Elo (wins only)'},
+    {k:'mine', w:0, l:'My rank'}
+  ];
+  const WEEKS = [...new Set(DATA.games.map(g=>g[0]))].sort((x,y)=>x-y);
+  const HIST = {};
+  function snapWeeks(){
+    const m0 = method, w0 = weight;
+    for (const W of WEEKS){
+      buildTeams(W);
+      AP = pollFor(W);
+      for (const s of SYS){
+        if (s.k === 'mine' && AP.week === null) continue;
+        method = s.k; weight = s.w; score();
+        const o = {}; for (const t of all) o[t.name] = t.rank;
+        (HIST[s.k] = HIST[s.k] || {})[W] = o;
+      }
+    }
+    buildTeams(Infinity); AP = pollFor(latestWeek);
+    method = m0; weight = w0; score();
+  }
+  const msys = document.getElementById('msys'), mfrom = document.getElementById('mfrom'), mto = document.getElementById('mto'), mscope = document.getElementById('mscope');
+  function fillMoverWeeks(){
+    const ws = Object.keys(HIST[msys.value] || {}).map(Number).sort((x,y)=>x-y);
+    const opt = w => `<option value="${w}">After week ${w}</option>`;
+    mfrom.innerHTML = ws.map(opt).join(''); mto.innerHTML = ws.map(opt).join('');
+    mto.value = String(ws[ws.length-1]);
+    mfrom.value = String(ws.length > 1 ? ws[ws.length-2] : ws[0]);
+  }
+  function renderMovers(){
+    const out = document.getElementById('movOut');
+    const H = HIST[msys.value] || {};
+    const f = Number(mfrom.value), to = Number(mto.value);
+    if (!H[f] || !H[to]){ out.innerHTML = '<p class="cmp-note">No history for this system yet.</p>'; return; }
+    if (f >= to){ out.innerHTML = '<p class="cmp-note">Pick a starting week earlier than the ending week.</p>'; return; }
+    const lim = mscope.value === 'top25' ? 25 : Infinity;
+    const rows = Object.keys(H[to]).map(n=>({n, a:H[f][n], b:H[to][n]}))
+      .filter(r=>r.a !== undefined && (r.a <= lim || r.b <= lim))
+      .map(r=>({...r, d:r.a - r.b}));
+    const up = rows.filter(r=>r.d>0).sort((x,y)=>y.d-x.d || x.b-y.b).slice(0,8);
+    const dn = rows.filter(r=>r.d<0).sort((x,y)=>x.d-y.d || x.b-y.b).slice(0,8);
+    const li = (r,cls) => `<li><span class="mv-team">${esc(r.n)}</span><span class="mv-rank">${r.a} → ${r.b}</span><span class="mv-d ${cls}">${cls==='up'?'▲':'▼'} ${Math.abs(r.d)}</span></li>`;
+    const list = (title, arr, cls) => `<div class="mv-col"><h4 class="cmp-h">${title}</h4>${arr.length ? '<ol class="mv">' + arr.map(r=>li(r,cls)).join('') + '</ol>' : '<p class="cmp-note">None.</p>'}</div>`;
+    out.innerHTML = `<div class="mv-cols">${list('Biggest risers', up, 'up')}${list('Biggest fallers', dn, 'dn')}</div>
+      <h4 class="cmp-h">Rank by week</h4>
+      <p class="cmp-note">The five biggest risers (green) and fallers (red) over the selected weeks, traced across the whole season. Lower is better.</p>
+      ${bumpChart(up.slice(0,5), dn.slice(0,5), H)}`;
+  }
+  function bumpChart(up, dn, H){
+    const ws = Object.keys(H).map(Number).sort((x,y)=>x-y);
+    const series = [...up.map(r=>({n:r.n, c:'var(--turf)'})), ...dn.map(r=>({n:r.n, c:'var(--loss)'}))];
+    if (!series.length || ws.length < 2) return '';
+    let maxR = 1;
+    for (const s of series) for (const w of ws) if (H[w][s.n] !== undefined) maxR = Math.max(maxR, H[w][s.n]);
+    maxR = Math.min(Math.max(maxR, 10), 140);
+    const W = 640, Hh = 300, L = 34, R = 128, Tp = 12, B = 26;
+    const x = i => L + (W-L-R) * (ws.length===1 ? 0 : i/(ws.length-1));
+    const y = r => Tp + (Hh-Tp-B) * (Math.min(r,maxR)-1)/(maxR-1);
+    let g = '';
+    const ticks = [1, ...[10,25,50,75,100,125].filter(v=>v<maxR), maxR];
+    for (const v of ticks) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`;
+    ws.forEach((w,i)=>{ g += `<text x="${x(i)}" y="${Hh-6}" text-anchor="middle" font-size="11" fill="var(--muted)">${w}</text>`; });
+    const labels = [];
+    for (const s of series){
+      const pts = ws.map((w,i)=> H[w][s.n] !== undefined ? `${x(i).toFixed(1)},${y(H[w][s.n]).toFixed(1)}` : null).filter(Boolean);
+      g += `<polyline points="${pts.join(' ')}" fill="none" stroke="${s.c}" stroke-width="2.25" stroke-linejoin="round" opacity=".9"><title>${esc(s.n)}</title></polyline>`;
+      const lw = ws[ws.length-1], lr = H[lw][s.n];
+      g += `<circle cx="${x(ws.length-1)}" cy="${y(lr)}" r="3" fill="${s.c}"/>`;
+      labels.push({n:s.n, c:s.c, y:y(lr), r:lr});
+    }
+    labels.sort((p,q)=>p.y-q.y);
+    for (let i=1;i<labels.length;i++) if (labels[i].y - labels[i-1].y < 12) labels[i].y = labels[i-1].y + 12;
+    for (const lb of labels) g += `<text x="${W-R+8}" y="${lb.y+4}" font-size="11" fill="${lb.c}" font-weight="600">${esc(lb.n)} (${lb.r})</text>`;
+    return `<div class="tablebox"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Rank by week for the biggest movers" style="width:100%;min-width:520px;height:auto;display:block;font-family:Barlow,system-ui,sans-serif">${g}</svg></div><p class="cmp-note">Week numbers along the bottom.</p>`;
+  }
+
+  // ---- Compare view ----
+  const VARIANTS = [
+    {g:'Recursive', l:'Quality weight 70% (default)', m:'rec', w:0.7},
+    {g:'Recursive', l:'Quality weight 85%', m:'rec', w:0.85},
+    {g:'Recursive', l:'Quality weight 50%', m:'rec', w:0.5},
+    {g:'Opponent wins + schedule', l:'Full schedule weight', m:'cnt', w:1},
+    {g:'Opponent wins + schedule', l:'Half schedule weight', m:'cnt', w:0.5},
+    {g:'Opponent wins + schedule', l:'No schedule weight', m:'cnt', w:0},
+    {g:'Elo', l:'Wins only', m:'elo', w:0},
+    {g:'Elo', l:'Margin of victory counts', m:'elo', w:1},
+    {g:'My rank', l:'Quality wins: any conference', m:'mine', w:0},
+    {g:'My rank', l:'Quality wins: power conferences only', m:'mine', w:1}
+  ];
+  const SNAP = [];
+  function snapAll(){
+    const m0 = method, w0 = weight;
+    VARIANTS.forEach((v,i)=>{
+      method = v.m; weight = v.w; score();
+      const o = {}; for (const t of all) o[t.name] = {rank:t.rank, tied:t.tied, pts:t.pts};
+      SNAP[i] = o;
+    });
+    method = m0; weight = w0; score();
+  }
+  const fmtVal = (v,m) => m === 'elo' ? String(Math.round(v)) : v.toFixed(1);
+  const names = Object.keys(T).sort((x,y)=>x.localeCompare(y));
+  const selA = document.getElementById('ca'), selB = document.getElementById('cb');
+  const apLabel = n => { const i = AP.top.indexOf(n); if (i >= 0) return 'AP #' + (i+1); return AP.votes.some(v=>v[0]===n) ? 'Receiving votes' : 'Unranked'; };
+  const resTxt = g => (g.won?'W ':'L ') + g.mp + '–' + g.opp;
+  function renderCompare(){
+    const out = document.getElementById('cmpOut');
+    const a = selA.value, b = selB.value;
+    if (!a || !b || a === b){ out.innerHTML = '<p class="cmp-note">Pick two different teams to compare.</p>'; return; }
+    const A = T[a], B = T[b];
+    const card = (t,c) => `<div class="cmp-card ${c}"><h3>${esc(t.name)}</h3><p>${esc(t.conf)}</p><p><b>${t.fW}-${t.fL}</b> vs. FBS${(t.aW+t.aL)!==(t.fW+t.fL)?', '+t.aW+'-'+t.aL+' overall':''}</p><p>${apLabel(t.name)}</p></div>`;
+    let wa = 0, wb = 0, sumA = 0, sumB = 0, lastG = '', rows = '';
+    VARIANTS.forEach((v,i)=>{
+      if (v.g !== lastG){ rows += `<tr class="grp"><th colspan="3">${v.g}</th></tr>`; lastG = v.g; }
+      const x = SNAP[i][a], y = SNAP[i][b];
+      sumA += x.rank; sumB += y.rank;
+      const ca = x.rank < y.rank, cb = y.rank < x.rank;
+      if (ca) wa++; if (cb) wb++;
+      const cell = (r,win) => `<td class="n${win?' best':''}">${r.tied?'T':''}${r.rank}<small>${fmtVal(r.pts, v.m)}</small></td>`;
+      rows += `<tr><th scope="row" style="font-weight:400;color:var(--ink)">${v.l}</th>${cell(x,ca)}${cell(y,cb)}</tr>`;
+    });
+    const n = VARIANTS.length, avA = sumA/n, avB = sumB/n;
+    const avgRow = `<tr class="avg"><th scope="row">Average rank</th><td class="n${avA<avB?' best':''}">${avA.toFixed(1)}</td><td class="n${avB<avA?' best':''}">${avB.toFixed(1)}</td></tr>`;
+    let summary;
+    if (wa === wb) summary = `${esc(a)} and ${esc(b)} split the ${n} systems ${wa}-${wb}.`;
+    else { const w = wa>wb?a:b, l = wa>wb?b:a; summary = `${esc(w)} ranks higher than ${esc(l)} in ${Math.max(wa,wb)} of ${n} systems.`; }
+    // head to head
+    const h2h = A.games.filter(g=>!g.fcs && g.op === b);
+    const h2hHtml = h2h.length
+      ? h2h.map(g=>`<div class="h2h"><b>${esc(g.won?a:b)}</b> beat ${esc(g.won?b:a)} ${Math.max(g.mp,g.opp)}–${Math.min(g.mp,g.opp)} on ${fmtDate(g.date)}${g.loc==='@'?' at '+esc(b):''}.</div>`).join('')
+      : '<div class="h2h">These teams haven’t played each other this season.</div>';
+    // common opponents
+    const byOpp = t => { const m = {}; for (const g of t.games) if (!g.fcs && g.op !== a && g.op !== b) (m[g.op] = m[g.op] || []).push(g); return m; };
+    const ma = byOpp(A), mb = byOpp(B);
+    const common = Object.keys(ma).filter(k=>mb[k]).sort((x,y)=>x.localeCompare(y));
+    const cell2 = gs => gs.map(g=>`<span style="${g.won?'':'color:var(--loss)'}">${resTxt(g)}</span>`).join('<br>');
+    const commonHtml = common.length
+      ? `<div class="tablebox"><table><thead><tr><th>Opponent</th><th class="n">${esc(a)}</th><th class="n">${esc(b)}</th></tr></thead><tbody>${common.map(k=>`<tr><td>${esc(k)}</td><td class="n">${cell2(ma[k])}</td><td class="n">${cell2(mb[k])}</td></tr>`).join('')}</tbody></table></div>`
+      : '<p class="cmp-note">No common FBS opponents.</p>';
+    out.innerHTML = `<div class="cmp-cards">${card(A,'a')}${card(B,'b')}</div>
+      <p class="cmp-sum">${summary}</p>
+      <p class="cmp-note">Each cell shows rank, with the score underneath. The better rank is highlighted. Every menu setting of each system is shown, and My rank uses the latest AP poll in the data.</p>
+      <div class="tablebox"><table class="cmp"><thead><tr><th></th><th class="n">${esc(a)}</th><th class="n">${esc(b)}</th></tr></thead><tbody>${rows}${avgRow}</tbody></table></div>
+      <h4 class="cmp-h">Head to head</h4>${h2hHtml}
+      <h4 class="cmp-h">Common opponents</h4>${commonHtml}`;
+  }
+  snapWeeks();
+  snapAll();
+  msys.innerHTML = SYS.filter(s=>HIST[s.k]).map(s=>`<option value="${s.k}">${s.l}</option>`).join('');
+  fillMoverWeeks();
+  msys.addEventListener('change', ()=>{ fillMoverWeeks(); renderMovers(); });
+  for (const el of [mfrom, mto, mscope]) el.addEventListener('change', renderMovers);
+  names.forEach(n=>{ for (const s of [selA, selB]){ const o = document.createElement('option'); o.value = n; o.textContent = n; s.appendChild(o); } });
+  const byRank = Object.keys(SNAP[0]).sort((x,y)=>SNAP[0][x].rank - SNAP[0][y].rank || x.localeCompare(y));
+  selA.value = byRank[0]; selB.value = byRank[1];
+  selA.addEventListener('change', renderCompare);
+  selB.addEventListener('change', renderCompare);
+  document.getElementById('cswap').addEventListener('click', ()=>{ const x = selA.value; selA.value = selB.value; selB.value = x; renderCompare(); });
+
+  // ---- Tabs ----
+  const VIEWS = {rankings:['viewR','tabR'], compare:['viewC','tabC'], movers:['viewM','tabM']};
+  function showView(v){
+    if (!VIEWS[v]) v = 'rankings';
+    for (const k in VIEWS){
+      const on = k === v;
+      document.getElementById(VIEWS[k][0]).hidden = !on;
+      document.getElementById(VIEWS[k][1]).setAttribute('aria-selected', String(on));
+    }
+    if (v === 'compare') renderCompare();
+    if (v === 'movers') renderMovers();
+  }
+  const hashView = () => (typeof location !== 'undefined' && VIEWS[location.hash.slice(1)]) ? location.hash.slice(1) : 'rankings';
+  const go = v => { if (typeof location !== 'undefined') location.hash = v; showView(v); };
+  for (const k in VIEWS) document.getElementById(VIEWS[k][1]).addEventListener('click', ()=>go(k));
+  if (typeof window.addEventListener === 'function') window.addEventListener('hashchange', ()=>showView(hashView()));
+  window.__dbg = {T, HIST, renderMovers, renderCompare, selA, selB, SNAP, showView, S, avgSOS, get all(){return all}, get mean(){return mean}, set(m,w){method=m;weight=w;render();}};
+  render();
+  showView(hashView());
+}
+fetch('data.json', {cache: 'no-store'})
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(startApp)
+  .catch(err => {
+    console.error(err);
+    document.getElementById('list').innerHTML = '<li class="empty">Couldn’t load data.json. Run the “Update rankings data” workflow, then reload this page.</li>';
+  });
+</script>
+</body>
+</html>
