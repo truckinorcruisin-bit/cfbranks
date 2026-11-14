@@ -11,7 +11,7 @@
 :root{
   --bg:#EEF1EC; --surface:#FFFFFF; --ink:#13223A; --muted:#5C6878; --rule:#D3D9D1;
   --turf:#2E6B3C; --turf-2:#4E8F5C; --turf-3:#8DBB93; --gold:#B8860B; --loss:#A63A2C; --fcs:#9AA3AD;
-  --row-hover:#F6F8F4;
+  --row-hover:#F6F8F4; --c-elo:#2F64A8; --c-mine:#8A3FA0;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -21,13 +21,13 @@
   :root:not([data-theme="light"]){
     --bg:#0F1A14; --surface:#16231B; --ink:#E7EDE6; --muted:#9AA79D; --rule:#2B3A30;
     --turf:#6FBF7F; --turf-2:#4E9A5E; --turf-3:#2F6B3C; --gold:#E2B54A; --loss:#E07A68; --fcs:#5E6A63;
-    --row-hover:#1B2A21; color-scheme:dark;
+    --row-hover:#1B2A21; --c-elo:#7FAEE6; --c-mine:#CF9BE6; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0F1A14; --surface:#16231B; --ink:#E7EDE6; --muted:#9AA79D; --rule:#2B3A30;
   --turf:#6FBF7F; --turf-2:#4E9A5E; --turf-3:#2F6B3C; --gold:#E2B54A; --loss:#E07A68; --fcs:#5E6A63;
-  --row-hover:#1B2A21; color-scheme:dark;
+  --row-hover:#1B2A21; --c-elo:#7FAEE6; --c-mine:#CF9BE6; color-scheme:dark;
 }
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:border-box}
@@ -71,6 +71,43 @@ ol.mv li:last-child{border-bottom:0}
 .mv-rank{color:var(--muted);font-size:.88rem}
 .mv-d{text-align:right;font-weight:700}
 .mv-d.up{color:var(--turf)} .mv-d.dn{color:var(--loss)}
+.tabs{overflow-x:auto;scrollbar-width:none}
+.tabs button{white-space:nowrap}
+ol.sp-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+li.sp{background:var(--surface);border:1px solid var(--rule);border-left:5px solid var(--rule);border-radius:6px;padding:12px 14px}
+li.sp.t1{border-left-color:var(--turf-3)} li.sp.t2{border-left-color:var(--turf-2)} li.sp.t3{border-left-color:var(--gold)}
+li.sp.done{opacity:.82}
+.sp-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sp-teams{font-weight:600;font-size:1.05rem}
+.sp-score{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:1.7rem;line-height:1}
+li.sp.t3 .sp-score{color:var(--gold)}
+.sp-lines{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.sp-lines small{display:block;color:var(--muted);font-size:.75rem}
+.sp-lines b{font-weight:600}
+.sp-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.sp-bar i{display:block;height:100%;background:var(--turf)}
+li.sp.t3 .sp-bar i{background:var(--gold)}
+.sp-note{margin:8px 0 4px;font-size:.88rem;color:var(--muted)}
+details summary{cursor:pointer;color:var(--turf);font-weight:600;font-size:.88rem;padding:4px 0}
+details table{margin-top:6px}
+.sp-how{background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:8px 14px;margin:0 0 12px}
+.sp-how p{font-size:.9rem;color:var(--muted);margin:6px 0}
+@media (max-width:560px){.sp-lines{grid-template-columns:1fr 1fr}.sp-lines div:last-child{grid-column:span 2}}
+.pf-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0 6px}
+@media (max-width:720px){.pf-cards{grid-template-columns:1fr 1fr}}
+.pf-card{background:var(--surface);border:1px solid var(--rule);border-top:5px solid var(--rule);border-radius:6px;padding:12px 14px}
+.pf-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pf-name{font-weight:600;line-height:1.2}
+.pf-grade{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:2.2rem;line-height:.9}
+.pf-grade.gA,.pf-grade.gB{color:var(--turf)} .pf-grade.gC{color:var(--gold)} .pf-grade.gD,.pf-grade.gF{color:var(--loss)}
+.pf-pl{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:1.6rem;margin:6px 0 2px;color:var(--turf)}
+.pf-pl.neg{color:var(--loss)}
+.pf-card p{margin:2px 0;font-size:.86rem;color:var(--muted)}
+.pf-card p.pf-pl{color:var(--turf)} .pf-card p.pf-pl.neg{color:var(--loss)}
+table.pf-table{background:var(--surface)}
+table.pf-table td small{display:block;color:var(--muted);font-size:.76rem}
+.pos{color:var(--turf);font-weight:600} .neg{color:var(--loss);font-weight:600}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;color:var(--surface);background:var(--gold);border-radius:999px;padding:1px 7px;vertical-align:2px;margin-left:4px}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 10px}
 .controls input,.controls select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:42px}
 .controls input{flex:1 1 200px}
@@ -132,6 +169,8 @@ td .res{font-weight:600}
   <button id="tabR" role="tab" aria-selected="true">Rankings</button>
   <button id="tabC" role="tab" aria-selected="false">Compare</button>
   <button id="tabM" role="tab" aria-selected="false">Movers</button>
+  <button id="tabS" role="tab" aria-selected="false">Spreads</button>
+  <button id="tabP" role="tab" aria-selected="false">Performance</button>
 </div>
 <div id="viewR">
 <div class="controls">
@@ -160,6 +199,23 @@ td .res{font-weight:600}
   </div>
   <div id="movOut"></div>
 </div>
+<div id="viewS" hidden>
+  <div class="cmp-pick">
+    <label>Model<select id="spm"><option value="all">Consensus of all four</option><option value="rec">Recursive</option><option value="cnt">Opponent wins + schedule</option><option value="elo">Elo</option><option value="mine">My rank</option></select></label>
+    <label>Sort<select id="sps"><option value="gap">Biggest variance first</option><option value="time">Kickoff time</option></select></label>
+    <label>Games<select id="spg"><option value="all">All FBS games</option><option value="top25">Involving an AP Top 25 team</option></select></label>
+  </div>
+  <div id="spOut"></div>
+</div>
+<div id="viewP" hidden>
+  <div id="perfOut"></div>
+  <h4 class="cmp-h">Bets by week</h4>
+  <div class="cmp-pick">
+    <label>Week<select id="pweek"></select></label>
+    <label>Model<select id="pmodel"></select></label>
+  </div>
+  <div id="perfBets"></div>
+</div>
 <section class="how">
   <h2>How the points work</h2>
   <p><b>Recursive (default).</b> A win over an FBS team earns a flat base credit plus a bonus tied to that team’s own score. That score is built the same way, from the wins it earned over other teams, and so on. The calculation repeats until the numbers stop changing, so a 5-2 record built on weak opponents ends up worth much less than a 5-2 record built on strong ones. An average opponent is worth 1.0 per win. The quality weight sets how much of each win comes from the opponent’s score instead of the flat credit.</p>
@@ -169,6 +225,8 @@ td .res{font-weight:600}
   <p id="apline"></p>
   <p>Games against FCS opponents are removed everywhere. A team that is 4-3 with one FCS win counts as 3-3 here, and a win over an FCS team earns nothing. Losses add nothing directly.</p>
   <p>The Movers tab replays the season one week at a time, scoring each system with only the games played so far (and, for My rank, the AP poll released after that week), then shows who rose and fell the most.</p>
+  <p>The Spreads tab turns each system’s pre-week ratings into a point spread for this week’s games and scores how far it sits from the sportsbook line.</p>
+  <p>The Performance tab grades each system by betting $5 a week on its 10 biggest disagreements with Vegas at −110 and tracking the running return.</p>
   <p>Tap a team to see each game and what it earned. Ties in points are broken by fewer FBS losses, then name. Results come from CollegeFootballData.com and include every completed game through the date above.</p>
 </section>
 </div>
@@ -431,6 +489,42 @@ function startApp(DATA){
   document.getElementById('method').addEventListener('change', e=>{ method = e.target.value; fillWeights(); render(); });
   sosSel.addEventListener('change', e=>{ weight = parseFloat(e.target.value); render(); });
   fillWeights();
+  // ---- Line fit + betting backtest ----
+  function fitLine(pts, W){
+    let sxx=0, sxz=0, szz=0, sxy=0, szy=0;
+    for (const g of DATA.games){
+      if (g[0] > W || !g[6] || !g[7]) continue;
+      const x = pts[g[2]] - pts[g[4]], z = g[8] ? 0 : 1, y = g[3] - g[5];
+      sxx += x*x; sxz += x*z; szz += z*z; sxy += x*y; szy += z*y;
+    }
+    const det = sxx*szz - sxz*sxz;
+    return {b: det ? (sxy*szz - szy*sxz)/det : 0, h: det ? (szy*sxx - sxy*sxz)/det : 0};
+  }
+  const BT_START = 3, STAKE = 5, WIN_PAY = STAKE*100/110, BT = {};
+  function backtestStep(k, W){
+    const BW = W + 1;
+    if (BW < BT_START) return;
+    let cand;
+    if (SL && SL.games && SL.week === BW) cand = SL.games.filter(g=>g.hF && g.aF && g.sp !== null && g.sp !== undefined).map(g=>({h:g.h, a:g.a, n:g.n, sp:g.sp, done:g.done, hp:g.hp, ap:g.ap, t:g.t}));
+    else cand = DATA.games.filter(g=>g[0] === BW && g[6] && g[7] && g[9] !== null && g[9] !== undefined).map(g=>({h:g[2], a:g[4], n:g[8], sp:g[9], done:true, hp:g[3], ap:g[5]}));
+    if (!cand.length) return;
+    const pts = {}; for (const t of all) pts[t.name] = t.pts;
+    const f = fitLine(pts, W);
+    const bets = cand.map(c=>{ const p = f.b*(pts[c.h]-pts[c.a]) + (c.n ? 0 : f.h), m = -c.sp; return {...c, p, m, gap: p - m}; })
+      .filter(x=>Math.abs(x.gap) > 1e-9)
+      .sort((x,y)=>Math.abs(y.gap) - Math.abs(x.gap))
+      .slice(0, 10);
+    let w=0, l=0, p=0, pend=0, pl=0;
+    for (const x of bets){
+      x.side = x.gap > 0 ? x.h : x.a;
+      if (!x.done){ x.res = 'pending'; pend++; continue; }
+      const ats = (x.hp - x.ap) - x.m;
+      x.res = ats === 0 ? 'P' : (Math.sign(ats) === Math.sign(x.gap) ? 'W' : 'L');
+      if (x.res === 'W'){ w++; pl += WIN_PAY; } else if (x.res === 'L'){ l++; pl -= STAKE; } else p++;
+    }
+    (BT[k] = BT[k] || {})[BW] = {bets, w, l, p, pend, pl};
+  }
+
   // ---- Weekly history for the movers tracker ----
   const SYS = [
     {k:'rec', w:0.7, l:'Recursive (70% quality weight)'},
@@ -450,6 +544,7 @@ function startApp(DATA){
         method = s.k; weight = s.w; score();
         const o = {}; for (const t of all) o[t.name] = t.rank;
         (HIST[s.k] = HIST[s.k] || {})[W] = o;
+        backtestStep(s.k, W);
       }
     }
     buildTeams(Infinity); AP = pollFor(latestWeek);
@@ -508,6 +603,170 @@ function startApp(DATA){
     for (let i=1;i<labels.length;i++) if (labels[i].y - labels[i-1].y < 12) labels[i].y = labels[i-1].y + 12;
     for (const lb of labels) g += `<text x="${W-R+8}" y="${lb.y+4}" font-size="11" fill="${lb.c}" font-weight="600">${esc(lb.n)} (${lb.r})</text>`;
     return `<div class="tablebox"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Rank by week for the biggest movers" style="width:100%;min-width:520px;height:auto;display:block;font-family:Barlow,system-ui,sans-serif">${g}</svg></div><p class="cmp-note">Week numbers along the bottom.</p>`;
+  }
+
+  // ---- Spreads view ----
+  const SL = DATA.slate;
+  const SPSYS = [
+    {k:'rec', w:0.7, l:'Recursive'},
+    {k:'cnt', w:1, l:'Opponent wins + schedule'},
+    {k:'elo', w:0, l:'Elo'},
+    {k:'mine', w:0, l:'My rank'}
+  ];
+  const PRE = {};
+  function prepSpreads(){
+    if (!SL || !SL.games || !SL.games.length) return;
+    const m0 = method, w0 = weight, W = SL.week - 1;
+    buildTeams(W); AP = pollFor(W);
+    for (const s of SPSYS){
+      if (s.k === 'mine' && AP.week === null) continue;
+      method = s.k; weight = s.w; score();
+      const pts = {}; for (const t of all) pts[t.name] = t.pts;
+      const f = fitLine(pts, W);
+      PRE[s.k] = {pts, l:s.l, b:f.b, h:f.h};
+    }
+    buildTeams(Infinity); AP = pollFor(latestWeek);
+    method = m0; weight = w0; score();
+  }
+  const fmtNum = x => String(Number(x.toFixed(2)));
+  const lineTxt = (home, away, margin, exact) => Math.abs(margin) < 0.05 ? 'Pick ’em' : `${esc(margin > 0 ? home : away)} −${exact ? fmtNum(Math.abs(margin)) : Math.abs(margin).toFixed(1)}`;
+  const spModel = document.getElementById('spm'), spSort = document.getElementById('sps'), spScope = document.getElementById('spg');
+  function sysMargin(k, g){ const P = PRE[k]; return P.b*(P.pts[g.h] - P.pts[g.a]) + (g.n ? 0 : P.h); }
+  function renderSpreads(){
+    const out = document.getElementById('spOut');
+    if (!SL || !SL.games || !SL.games.length || !Object.keys(PRE).length){ out.innerHTML = '<p class="cmp-note">No upcoming games with lines in the data right now.</p>'; return; }
+    const keys = spModel.value === 'all' ? Object.keys(PRE) : [spModel.value];
+    const top = new Set(AP.top);
+    let rows = [];
+    let skippedFCS = 0;
+    for (const g of SL.games){
+      if (!(g.hF && g.aF)){ skippedFCS++; continue; }
+      if (g.sp === null || g.sp === undefined) continue;
+      if (spScope.value === 'top25' && !(top.has(g.h) || top.has(g.a))) continue;
+      const m = -g.sp;
+      const ms = keys.map(k=>sysMargin(k, g));
+      const p = ms.reduce((s,v)=>s+v,0)/ms.length;
+      const gap = p - m;
+      const agree = ms.filter(v => Math.sign(v - m) === Math.sign(gap) && gap !== 0).length;
+      let cover = null;
+      if (g.done){ const ats = (g.hp - g.ap) - m; cover = ats === 0 ? 'push' : (Math.sign(ats) === Math.sign(gap) ? 'yes' : 'no'); }
+      rows.push({g, m, p, gap, agree, n: ms.length, cover});
+    }
+    if (spSort.value === 'gap') rows.sort((x,y)=>Math.abs(y.gap) - Math.abs(x.gap));
+    else rows.sort((x,y)=> x.g.t < y.g.t ? -1 : x.g.t > y.g.t ? 1 : 0);
+    const maxGap = Math.max(1, ...rows.map(r=>Math.abs(r.gap)));
+    const card10 = new Set();
+    if (keys.length === 1 && BT[keys[0]] && BT[keys[0]][SL.week]) for (const x of BT[keys[0]][SL.week].bets) card10.add(x.h + '|' + x.a);
+    const rec = rs => { const w = rs.filter(r=>r.cover==='yes').length, l = rs.filter(r=>r.cover==='no').length, p = rs.filter(r=>r.cover==='push').length; return `${w}–${l}${p ? `–${p}` : ''}`; };
+    const done = rows.filter(r=>r.cover);
+    const big = done.filter(r=>Math.abs(r.gap) >= 3);
+    const summary = done.length
+      ? `In games already played this week, the side the model leans toward is ${rec(done)} against the spread${big.length ? `, and ${rec(big)} when the gap is 3 points or more` : ''}.`
+      : 'No games from this week have finished yet.';
+    const kick = iso => new Date(iso).toLocaleString('en-US', {weekday:'short', hour:'numeric', minute:'2-digit'});
+    const cards = rows.map(r=>{
+      const g = r.g, side = r.gap > 0 ? g.h : g.a, s = Math.abs(r.gap);
+      const tier = s >= 7 ? 3 : s >= 4 ? 2 : s >= 2 ? 1 : 0;
+      const matchup = `${esc(g.a)} ${g.n ? 'vs.' : 'at'} ${esc(g.h)}`;
+      const status = g.done
+        ? `Final: ${esc(g.a)} ${g.ap}, ${esc(g.h)} ${g.hp}. ${r.cover === 'yes' ? 'Model side covered.' : r.cover === 'no' ? 'Model side did not cover.' : 'Push.'}`
+        : kick(g.t);
+      const sysRows = Object.keys(PRE).map(k=>{ const v = sysMargin(k, g); return `<tr><td>${PRE[k].l}</td><td class="n">${lineTxt(g.h, g.a, v)}</td><td class="n">${(v - r.m >= 0 ? '+' : '−') + Math.abs(v - r.m).toFixed(1)} ${esc(v - r.m >= 0 ? g.h : g.a)}</td></tr>`; }).join('');
+      return `<li class="sp t${tier}${g.done ? ' done' : ''}">
+        <div class="sp-head"><span class="sp-teams">${matchup}${card10.has(g.h + '|' + g.a) ? ' <span class="pill">$5 card</span>' : ''}</span><span class="sp-score" title="Variance score">${s.toFixed(1)}</span></div>
+        <div class="sp-lines">
+          <div><small>Vegas${g.books ? ` (${g.books} book${g.books===1?'':'s'})` : ''}</small><b>${lineTxt(g.h, g.a, r.m, true)}</b></div>
+          <div><small>Model</small><b>${lineTxt(g.h, g.a, r.p)}</b></div>
+          <div><small>Model leans</small><b>${esc(side)}</b></div>
+        </div>
+        <div class="sp-bar" aria-hidden="true"><i style="width:${(s/maxGap*100).toFixed(1)}%"></i></div>
+        <p class="sp-note">The model likes ${esc(side)} by ${s.toFixed(1)} more points than Vegas${r.n > 1 ? `; ${r.agree} of ${r.n} systems agree` : ''}. ${status}</p>
+        <details><summary>Line from each system</summary><div class="tablebox"><table><thead><tr><th>System</th><th class="n">Line</th><th class="n">vs. Vegas</th></tr></thead><tbody>${sysRows}</tbody></table></div></details>
+      </li>`;
+    }).join('');
+    const fits = Object.keys(PRE).map(k=>{ const P = PRE[k]; return `${P.l}: ${k==='elo' ? `1 point per ${(1/P.b).toFixed(0)} rating points` : `${P.b.toFixed(2)} points per 1.0 of score`}, home field ${P.h.toFixed(1)}`; }).join('. ');
+    out.innerHTML = `<p class="cmp-sum">Week ${SL.week}: ${rows.length} game${rows.length===1?'':'s'} with lines. ${summary}</p>
+      <details class="sp-how"><summary>How the model line and variance score work</summary>
+        <p>The Vegas line is the median across sportsbooks in the data. Each system’s ratings from before this week are turned into a point spread using a fit on this season’s FBS results: points per unit of rating, plus a home-field edge for non-neutral games. The consensus line averages the four systems.</p>
+        <p>The <b>variance score</b> is how many points the chosen model’s line differs from Vegas. Higher means more disagreement. The bar compares each game with the biggest gap on the list. ${skippedFCS ? `${skippedFCS} game${skippedFCS===1?'':'s'} against FCS teams ${skippedFCS===1?'is':'are'} left out.` : ''}</p>
+        <p>Current fits. ${fits}.</p>
+      </details>
+      ${rows.length ? `<ol class="sp-list">${cards}</ol>` : '<p class="cmp-note">No games match this filter.</p>'}`;
+  }
+
+  // ---- Performance view ----
+  const PCOL = {rec:'var(--turf)', cnt:'var(--gold)', elo:'var(--c-elo)', mine:'var(--c-mine)'};
+  const money = v => (v < 0 ? '−$' : v > 0 ? '+$' : '$') + Math.abs(v).toFixed(2);
+  const gradeOf = roi => roi >= 0.10 ? 'A' : roi >= 0.03 ? 'B' : roi >= -0.03 ? 'C' : roi >= -0.10 ? 'D' : 'F';
+  const pwSel = document.getElementById('pweek'), pmSel = document.getElementById('pmodel');
+  function perfWeeks(){ const s = new Set(); for (const k in BT) for (const w in BT[k]) s.add(Number(w)); return [...s].sort((x,y)=>x-y); }
+  function renderPerf(){
+    const out = document.getElementById('perfOut');
+    const ws = perfWeeks();
+    const ks = SYS.map(s=>s.k).filter(k=>BT[k]);
+    if (!ws.length || !ks.length){ out.innerHTML = '<p class="cmp-note">No betting lines in the data yet, so there is nothing to grade.</p>'; return; }
+    const tot = {};
+    for (const k of ks){
+      let w=0,l=0,p=0,pend=0,pl=0, cum=0; const series = [];
+      for (const wk of ws){ const r = BT[k][wk]; if (r){ w+=r.w; l+=r.l; p+=r.p; pend+=r.pend; pl+=r.pl; cum+=r.pl; } series.push(cum); }
+      const wag = STAKE*(w+l+p);
+      tot[k] = {w,l,p,pend,pl,wag,roi: wag ? pl/wag : 0, series};
+    }
+    const label = k => SYS.find(s=>s.k===k).l;
+    const cards = ks.slice().sort((x,y)=>tot[y].pl - tot[x].pl).map(k=>{
+      const r = tot[k], g = gradeOf(r.roi);
+      return `<div class="pf-card" style="border-top-color:${PCOL[k]}"><div class="pf-top"><span class="pf-name">${label(k)}</span><span class="pf-grade g${g}">${g}</span></div>
+        <p class="pf-pl ${r.pl<0?'neg':''}">${money(r.pl)}</p>
+        <p>${r.w}-${r.l}${r.p?'-'+r.p:''} against the spread (${r.w+r.l ? (100*r.w/(r.w+r.l)).toFixed(1) : '0.0'}%)</p>
+        <p>ROI ${(100*r.roi).toFixed(1)}% on $${r.wag.toFixed(0)} wagered${r.pend ? `, ${r.pend} bet${r.pend===1?'':'s'} pending` : ''}</p></div>`;
+    }).join('');
+    // chart
+    const W = 640, H = 280, L = 52, R = 128, Tp = 14, B = 28;
+    let lo = 0, hi = 0; for (const k of ks) for (const v of tot[k].series){ lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    const pad = Math.max(5, (hi-lo)*0.08); lo -= pad; hi += pad;
+    const x = i => L + (W-L-R) * (ws.length === 1 ? 0.5 : i/(ws.length-1));
+    const y = v => Tp + (H-Tp-B) * (hi - v)/(hi - lo);
+    const step = (()=>{ const raw = (hi-lo)/5, mag = Math.pow(10, Math.floor(Math.log10(raw))); return [1,2,5,10].map(m=>m*mag).find(s=>s >= raw); })();
+    let g = '';
+    for (let v = Math.ceil(lo/step)*step; v <= hi; v += step) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${money(v).replace('.00','')}</text>`;
+    g += `<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink)" stroke-width="1.25"/>`;
+    ws.forEach((wk,i)=>{ g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">${wk}</text>`; });
+    const labels = [];
+    for (const k of ks){
+      const s = tot[k].series;
+      g += `<polyline points="${s.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${PCOL[k]}" stroke-width="2.5" stroke-linejoin="round"><title>${label(k)}</title></polyline>`;
+      s.forEach((v,i)=>{ g += `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.6" fill="${PCOL[k]}"><title>${label(k)}, week ${ws[i]}: ${money(v)}</title></circle>`; });
+      labels.push({k, y: y(s[s.length-1]), v: s[s.length-1]});
+    }
+    labels.sort((p,q)=>p.y-q.y);
+    for (let i=1;i<labels.length;i++) if (labels[i].y - labels[i-1].y < 13) labels[i].y = labels[i-1].y + 13;
+    for (const lb of labels) g += `<text x="${W-R+8}" y="${lb.y+4}" font-size="11" font-weight="600" fill="${PCOL[lb.k]}">${SYS.find(s=>s.k===lb.k).l.split(' (')[0]} ${money(lb.v)}</text>`;
+    const chart = `<div class="tablebox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative returns by week for each model" style="width:100%;min-width:520px;height:auto;display:block;font-family:Barlow,system-ui,sans-serif">${g}</svg></div>`;
+    // history table
+    const head = `<tr><th>Week</th>${ks.map(k=>`<th class="n" style="color:${PCOL[k]}">${label(k).split(' (')[0]}</th>`).join('')}</tr>`;
+    const body = ws.map((wk,i)=>`<tr><td>${wk}</td>${ks.map(k=>{ const r = BT[k][wk]; if (!r) return '<td class="n">—</td>'; return `<td class="n"><span class="${r.pl<0?'neg':'pos'}">${money(r.pl)}</span><small>${r.w}-${r.l}${r.p?'-'+r.p:''}${r.pend?`, ${r.pend} open`:''} · total ${money(tot[k].series[i])}</small></td>`; }).join('')}</tr>`).join('');
+    out.innerHTML = `<div class="pf-cards">${cards}</div>
+      <h4 class="cmp-h">Total returns by week</h4>${chart}
+      <p class="cmp-note">Week numbers along the bottom. Each point is the running total after that week’s bets settle.</p>
+      <h4 class="cmp-h">Performance history</h4>
+      <div class="tablebox"><table class="pf-table"><thead>${head}</thead><tbody>${body}</tbody></table></div>
+      <details class="sp-how"><summary>How the grade works</summary>
+        <p>Every week from week ${BT_START} on, each model bets $${STAKE} on its 10 games with the biggest variance score: the side its line likes more than Vegas does, using only games played before that week. Bets are at −110, so a win pays $${WIN_PAY.toFixed(2)}, a loss costs $${STAKE}, and a push returns the stake. The line is the median across sportsbooks in the data, and each model uses its default setting (Recursive at 70%, full schedule weight, Elo wins only, My rank with quality wins from any conference).</p>
+        <p>Grades come from return on money wagered: A is +10% or better, B is +3% to +10%, C is −3% to +3%, D is −10% to −3%, and F is worse than −10%. Breaking even at −110 takes a 52.4% win rate. Bets on this week’s unplayed games show as open until they finish.</p>
+      </details>`;
+    renderPerfBets();
+  }
+  function renderPerfBets(){
+    const out = document.getElementById('perfBets');
+    const r = BT[pmSel.value] && BT[pmSel.value][Number(pwSel.value)];
+    if (!r){ out.innerHTML = '<p class="cmp-note">No bets for this model that week.</p>'; return; }
+    const rows = r.bets.map(x=>{
+      const res = x.res === 'pending' ? 'Open' : x.res === 'W' ? 'Won' : x.res === 'L' ? 'Lost' : 'Push';
+      const pl = x.res === 'W' ? WIN_PAY : x.res === 'L' ? -STAKE : 0;
+      const sideLine = x.side === x.h ? -x.m : x.m;
+      return `<tr class="${x.res==='L'?'l':''}"><td>${esc(x.a)} ${x.n?'vs.':'at'} ${esc(x.h)}</td><td>${esc(x.side)} ${sideLine>0?'+':sideLine<0?'−':''}${fmtNum(Math.abs(sideLine))}</td><td class="n">${Math.abs(x.gap).toFixed(1)}</td><td class="n">${x.done ? `${x.ap}–${x.hp}` : '—'}</td><td class="n">${res}${x.res==='pending'?'':' '+money(pl)}</td></tr>`;
+    }).join('');
+    out.innerHTML = `<div class="tablebox"><table><thead><tr><th>Game</th><th>Bet</th><th class="n">Variance</th><th class="n">Score (away–home)</th><th class="n">Result</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
   // ---- Compare view ----
@@ -580,7 +839,15 @@ function startApp(DATA){
       <h4 class="cmp-h">Common opponents</h4>${commonHtml}`;
   }
   snapWeeks();
+  prepSpreads();
   snapAll();
+  for (const el of [spModel, spSort, spScope]) el.addEventListener('change', renderSpreads);
+  {
+    const ws = perfWeeks();
+    pwSel.innerHTML = ws.slice().reverse().map(w=>`<option value="${w}">Week ${w}</option>`).join('');
+    pmSel.innerHTML = SYS.filter(s=>BT[s.k]).map(s=>`<option value="${s.k}">${s.l}</option>`).join('');
+    pwSel.addEventListener('change', renderPerfBets); pmSel.addEventListener('change', renderPerfBets);
+  }
   msys.innerHTML = SYS.filter(s=>HIST[s.k]).map(s=>`<option value="${s.k}">${s.l}</option>`).join('');
   fillMoverWeeks();
   msys.addEventListener('change', ()=>{ fillMoverWeeks(); renderMovers(); });
@@ -593,7 +860,7 @@ function startApp(DATA){
   document.getElementById('cswap').addEventListener('click', ()=>{ const x = selA.value; selA.value = selB.value; selB.value = x; renderCompare(); });
 
   // ---- Tabs ----
-  const VIEWS = {rankings:['viewR','tabR'], compare:['viewC','tabC'], movers:['viewM','tabM']};
+  const VIEWS = {rankings:['viewR','tabR'], compare:['viewC','tabC'], movers:['viewM','tabM'], spreads:['viewS','tabS'], performance:['viewP','tabP']};
   function showView(v){
     if (!VIEWS[v]) v = 'rankings';
     for (const k in VIEWS){
@@ -603,12 +870,14 @@ function startApp(DATA){
     }
     if (v === 'compare') renderCompare();
     if (v === 'movers') renderMovers();
+    if (v === 'spreads') renderSpreads();
+    if (v === 'performance') renderPerf();
   }
   const hashView = () => (typeof location !== 'undefined' && VIEWS[location.hash.slice(1)]) ? location.hash.slice(1) : 'rankings';
   const go = v => { if (typeof location !== 'undefined') location.hash = v; showView(v); };
   for (const k in VIEWS) document.getElementById(VIEWS[k][1]).addEventListener('click', ()=>go(k));
   if (typeof window.addEventListener === 'function') window.addEventListener('hashchange', ()=>showView(hashView()));
-  window.__dbg = {T, HIST, renderMovers, renderCompare, selA, selB, SNAP, showView, S, avgSOS, get all(){return all}, get mean(){return mean}, set(m,w){method=m;weight=w;render();}};
+  window.__dbg = {T, HIST, PRE, BT, renderPerf, renderSpreads, renderMovers, renderCompare, selA, selB, SNAP, showView, S, avgSOS, get all(){return all}, get mean(){return mean}, set(m,w){method=m;weight=w;render();}};
   render();
   showView(hashView());
 }
