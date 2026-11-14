@@ -1,3 +1,44 @@
 {
- "picks": []
+ "picks": [
+  {
+   "week": 11,
+   "h": "LSU",
+   "a": "Texas",
+   "n": false,
+   "side": "Texas",
+   "sp": -5,
+   "t": "2026-11-15T00:30:00.000Z",
+   "at": "2026-11-14T21:23:28.988Z"
+  },
+  {
+   "week": 11,
+   "h": "Arizona",
+   "a": "Utah",
+   "n": false,
+   "side": "Utah",
+   "sp": 1.5,
+   "t": "2026-11-15T03:30:00.000Z",
+   "at": "2026-11-14T21:23:28.989Z"
+  },
+  {
+   "week": 11,
+   "h": "Oklahoma State",
+   "a": "Texas Tech",
+   "n": false,
+   "side": "Texas Tech",
+   "sp": -3.5,
+   "t": "2026-11-15T02:30:00.000Z",
+   "at": "2026-11-14T21:23:28.989Z"
+  },
+  {
+   "week": 11,
+   "h": "Kentucky",
+   "a": "Florida",
+   "n": false,
+   "side": "Kentucky",
+   "sp": -3,
+   "t": "2026-11-14T23:15:00.000Z",
+   "at": "2026-11-14T21:23:28.989Z"
+  }
+ ]
 }
