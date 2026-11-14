@@ -1,7 +1,7 @@
 # Résumé Rank
 
 College football rankings built from results alone, with five views of the same season:
-**Recursive**, **Opponent wins + schedule**, **Elo**, **My rank** (AP-poll based), a **Compare** tab for any two teams, a **Movers** tab that replays the season week by week, a **Spreads** tab that compares each system's implied point spread with the sportsbook line for this week's games, and a **Performance** tab that grades each system with a weekly $5 betting backtest.
+**Recursive**, **Opponent wins + schedule**, **Elo**, **My rank** (AP-poll based), a **Compare** tab for any two teams, a **Movers** tab that replays the season week by week, a **Spreads** tab that compares each system's implied point spread with the sportsbook line for this week's games, a **Performance** tab that grades each system with a weekly $5 betting backtest, and a **My picks** tab where you lock in your own picks each week and track them against the models.
 
 The page is a single static `index.html` that reads `data.json`. A GitHub Action refreshes `data.json` from [CollegeFootballData.com](https://collegefootballdata.com) and redeploys the site to GitHub Pages on a schedule.
 
@@ -11,6 +11,7 @@ The page is a single static `index.html` that reads `data.json`. A GitHub Action
    ```
    index.html
    data.json
+   picks.json
    scripts/build_data.py
    .github/workflows/update.yml
    README.md
@@ -24,6 +25,24 @@ The page is a single static `index.html` that reads `data.json`. A GitHub Action
 4. **Turn on Pages:** Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 
 5. **Run it once:** Actions → *Update rankings data* → Run workflow. When it finishes, the site is live at `https://<your-user>.github.io/<repo-name>/`.
+
+## My picks: set your password
+
+Anyone can view the site, but only you can submit picks. The site is static, so a password typed into the page can't be checked securely or save anything by itself. Instead, the "password" is a GitHub token that can write to this one repo. Picks are committed to `picks.json`, and the commit history doubles as a timestamped record that each pick went in before kickoff.
+
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → **Generate new token** (https://github.com/settings/personal-access-tokens/new).
+2. Name it something like `cfbranks picks` and pick an expiration (a season-long date is fine).
+3. **Repository access:** Only select repositories → this repo.
+4. **Permissions → Repository permissions → Contents:** Read and write. Leave everything else at No access.
+5. Generate it and copy the token (it starts with `github_pat_`). Keep it somewhere safe; GitHub only shows it once.
+6. On the site's **My picks** tab, select your sides, paste the token into the password box, and tap **Lock in picks**. Check "Remember on this device" to skip pasting it next time (it's stored only in that browser, and "Forget saved password" removes it).
+
+How picks work:
+- Each pick is a $5 bet at −110 against the median line shown on the site when you submit it. That line is locked with the pick.
+- Picks can't be changed after submission, and a game can't be picked once it kicks off.
+- Results are graded from the same data feed as everything else, usually within an hour of the game ending on Saturdays.
+- The comparison line is the average of the four models' weekly $5 cards (10 bets each) over the weeks you've made picks. Compare ROI for a fair read, since the number of bets differs.
+- If the token expires or is revoked, generate a new one the same way.
 
 ## When it updates
 
@@ -60,6 +79,7 @@ Opening `index.html` directly from disk won't work because browsers block `fetch
 ## Files
 
 - `index.html`: the whole app (HTML, CSS and JavaScript). No build step.
+- `picks.json`: your locked picks, written by the site when you submit. Each pick records the week, teams, side, line, kickoff and submission time.
 - `data.json`: `{season, updated, slate, conf, games, ap}`. `slate` holds the current week's games with the median spread (home-team perspective, negative means the home team is favored). Each game is `[week, date, home, homePts, away, awayPts, homeIsFBS, awayIsFBS, neutral, medianSpread]`, where the spread is from the home team's perspective (negative means the home team was favored) or `null` if no line was posted.
 - `scripts/build_data.py`: fetches CFBD data and writes `data.json`. Standard library only.
 - `.github/workflows/update.yml`: the schedule, the data refresh and the Pages deploy.

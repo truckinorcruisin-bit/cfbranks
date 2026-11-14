@@ -108,6 +108,27 @@ table.pf-table{background:var(--surface)}
 table.pf-table td small{display:block;color:var(--muted);font-size:.76rem}
 .pos{color:var(--turf);font-weight:600} .neg{color:var(--loss);font-weight:600}
 .pill{display:inline-block;font-size:.72rem;font-weight:700;color:var(--surface);background:var(--gold);border-radius:999px;padding:1px 7px;vertical-align:2px;margin-left:4px}
+.pk-board{display:grid;gap:8px}
+.pk-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 12px}
+.pk-row.is-locked{border-color:var(--turf)}
+.pk-match b{font-weight:600;display:block}
+.pk-match small{color:var(--muted);font-size:.82rem}
+.pk-btns{display:flex;gap:6px}
+.pk-b{font:inherit;font-weight:600;font-size:.88rem;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:8px 10px;min-height:44px;min-width:7.5rem;cursor:pointer}
+.pk-b.on{background:var(--turf);color:var(--surface);border-color:var(--turf)}
+.pk-b.locked{background:transparent;color:var(--turf);border:2px solid var(--turf);opacity:1}
+.pk-b:disabled:not(.locked){opacity:.45;cursor:not-allowed}
+.pk-bar{position:sticky;bottom:0;margin-top:18px;background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--turf);border-radius:8px 8px 0 0;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));z-index:5}
+.pk-bar-in{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pk-count{font-weight:600;flex:1 1 100%}
+.pk-bar input[type=password]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:44px;flex:1 1 160px}
+.pk-rem{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+.pk-go{font:inherit;font-weight:700;color:var(--surface);background:var(--turf);border:0;border-radius:8px;padding:10px 16px;min-height:44px;cursor:pointer}
+.pk-go:disabled{opacity:.5;cursor:not-allowed}
+.pk-msg{margin:6px 0 0;font-size:.88rem;color:var(--muted);min-height:1.2em}
+.pk-forget{font:inherit;font-size:.8rem;color:var(--muted);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline}
+@media (max-width:560px){.pk-row{grid-template-columns:1fr}.pk-b{flex:1;min-width:0}}
+.pk-cards{grid-template-columns:1fr 1fr}
 .controls{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 10px}
 .controls input,.controls select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:42px}
 .controls input{flex:1 1 200px}
@@ -171,6 +192,7 @@ td .res{font-weight:600}
   <button id="tabM" role="tab" aria-selected="false">Movers</button>
   <button id="tabS" role="tab" aria-selected="false">Spreads</button>
   <button id="tabP" role="tab" aria-selected="false">Performance</button>
+  <button id="tabK" role="tab" aria-selected="false">My picks</button>
 </div>
 <div id="viewR">
 <div class="controls">
@@ -216,6 +238,22 @@ td .res{font-weight:600}
   </div>
   <div id="perfBets"></div>
 </div>
+<div id="viewK" hidden>
+  <div class="cmp-pick">
+    <label>Board<select id="pkScope"><option value="top25">Games with an AP Top 25 team</option><option value="all">All FBS games</option></select></label>
+  </div>
+  <div id="pkOut"></div>
+  <div id="pkBar" class="pk-bar" hidden>
+    <div class="pk-bar-in">
+      <span id="pkCount" class="pk-count">No picks selected</span>
+      <input id="pkPw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password">
+      <label class="pk-rem"><input id="pkRemember" type="checkbox"> Remember on this device</label>
+      <button id="pkSubmit" class="pk-go" disabled>Lock in picks</button>
+    </div>
+    <p id="pkMsg" class="pk-msg" role="status"></p>
+    <button id="pkForget" class="pk-forget" type="button">Forget saved password</button>
+  </div>
+</div>
 <section class="how">
   <h2>How the points work</h2>
   <p><b>Recursive (default).</b> A win over an FBS team earns a flat base credit plus a bonus tied to that team’s own score. That score is built the same way, from the wins it earned over other teams, and so on. The calculation repeats until the numbers stop changing, so a 5-2 record built on weak opponents ends up worth much less than a 5-2 record built on strong ones. An average opponent is worth 1.0 per win. The quality weight sets how much of each win comes from the opponent’s score instead of the flat credit.</p>
@@ -233,7 +271,8 @@ td .res{font-weight:600}
 <script>
 const DATA = 
 null;
-function startApp(DATA){
+function startApp(DATA, appOptions){
+  const OPTS = appOptions || {};
   const fbs = DATA.conf;
   const T = {};
   let last = '', avgSOS = 1, maxWeek = Infinity;
@@ -769,6 +808,207 @@ function startApp(DATA){
     out.innerHTML = `<div class="tablebox"><table><thead><tr><th>Game</th><th>Bet</th><th class="n">Variance</th><th class="n">Score (away–home)</th><th class="n">Result</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
+  // ---- My picks ----
+  const REPO = OPTS.repo || (()=>{
+    try {
+      const host = location.hostname;
+      if (host.endsWith('.github.io')){
+        const owner = host.split('.')[0], seg = location.pathname.split('/').filter(Boolean)[0];
+        return owner + '/' + (seg || host);
+      }
+    } catch(e){}
+    return 'truckinorcruisin-bit/cfbranks';
+  })();
+  const PICKS_PATH = 'picks.json', BRANCH = 'main', TOKEN_KEY = 'cfbranks-token';
+  let PICKS = [], picksLoaded = false, picksNote = '';
+  const chosen = new Map();
+  const pkey = (w,h,a) => w + '|' + h + '|' + a;
+  const b64dec = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,'')), c=>c.charCodeAt(0)));
+  const b64enc = s => { const bytes = new TextEncoder().encode(s); let bin = ''; for (const b of bytes) bin += String.fromCharCode(b); return btoa(bin); };
+  const storedToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch(e){ return ''; } };
+  async function readPicksFile(token){
+    const headers = {Accept:'application/vnd.github+json'};
+    if (token) headers.Authorization = 'Bearer ' + token;
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${PICKS_PATH}?ref=${BRANCH}&t=${Date.now()}`, {headers, cache:'no-store'});
+    if (r.status === 404) return {picks:[], sha:null, status:404};
+    if (!r.ok) return {error:r.status};
+    const j = await r.json();
+    const body = JSON.parse(b64dec(j.content || 'e30='));
+    return {picks: body.picks || [], sha: j.sha};
+  }
+  async function loadPicks(){
+    if (OPTS.readOnly){ picksLoaded = true; picksNote = 'readonly'; return; }
+    try {
+      const res = await readPicksFile('');
+      if (!res.error){ PICKS = res.picks; picksLoaded = true; return; }
+    } catch(e){}
+    try { const r = await fetch('picks.json', {cache:'no-store'}); if (r.ok) PICKS = (await r.json()).picks || []; } catch(e){}
+    picksLoaded = true;
+  }
+  function resultMap(){
+    const m = {};
+    for (const g of DATA.games) m[pkey(g[0], g[2], g[4])] = [g[3], g[5]];
+    if (SL && SL.games) for (const g of SL.games) if (g.done) m[pkey(SL.week, g.h, g.a)] = [g.hp, g.ap];
+    return m;
+  }
+  function gradePick(p, RM){
+    const r = RM[pkey(p.week, p.h, p.a)];
+    if (!r) return 'pending';
+    const ats = (r[0] - r[1]) + p.sp;
+    if (ats === 0) return 'P';
+    return (p.side === p.h ? ats > 0 : ats < 0) ? 'W' : 'L';
+  }
+  const sideLineTxt = (p, side) => { const v = side === p.h ? p.sp : -p.sp; return `${esc(side)} ${v > 0 ? '+' : v < 0 ? '−' : ''}${v === 0 ? 'PK' : fmtNum(Math.abs(v))}`; };
+  function pickStats(){
+    const RM = resultMap(), byWeek = {};
+    for (const p of PICKS){
+      const res = gradePick(p, RM);
+      const s = byWeek[p.week] = byWeek[p.week] || {w:0,l:0,p:0,o:0,pl:0,items:[]};
+      s.items.push({...p, res});
+      if (res === 'W'){ s.w++; s.pl += WIN_PAY; } else if (res === 'L'){ s.l++; s.pl -= STAKE; } else if (res === 'P') s.p++; else s.o++;
+    }
+    return byWeek;
+  }
+  function modelAvgWeek(w){
+    const ks = Object.keys(BT).filter(k=>BT[k][w]);
+    if (!ks.length) return null;
+    let pl = 0, n = 0, settled = 0;
+    for (const k of ks){ pl += BT[k][w].pl; settled += BT[k][w].w + BT[k][w].l + BT[k][w].p; n++; }
+    return {pl: pl/n, wag: STAKE*settled/n};
+  }
+  function renderPicks(){
+    const out = document.getElementById('pkOut');
+    if (!picksLoaded){ out.innerHTML = '<p class="cmp-note">Loading picks…</p>'; return; }
+    const byWeek = pickStats();
+    const weeks = Object.keys(byWeek).map(Number).sort((x,y)=>x-y);
+    // summary
+    let W=0,L=0,P=0,O=0,PL=0; for (const w of weeks){ const s = byWeek[w]; W+=s.w; L+=s.l; P+=s.p; O+=s.o; PL+=s.pl; }
+    const wag = STAKE*(W+L+P), roi = wag ? PL/wag : 0;
+    let mPL = 0, mWag = 0; for (const w of weeks){ const m = modelAvgWeek(w); if (m){ mPL += m.pl; mWag += m.wag; } }
+    const mRoi = mWag ? mPL/mWag : 0;
+    const summary = weeks.length ? `<div class="pf-cards pk-cards">
+        <div class="pf-card" style="border-top-color:var(--ink)"><div class="pf-top"><span class="pf-name">Your picks</span><span class="pf-grade g${gradeOf(roi)}">${wag ? gradeOf(roi) : '–'}</span></div><p class="pf-pl ${PL<0?'neg':''}">${money(PL)}</p><p>${W}-${L}${P?'-'+P:''} against the spread${O ? `, ${O} open` : ''}</p><p>ROI ${(100*roi).toFixed(1)}% on $${wag.toFixed(0)} wagered</p></div>
+        <div class="pf-card" style="border-top-color:var(--muted)"><div class="pf-top"><span class="pf-name">Model average, same weeks</span><span class="pf-grade g${gradeOf(mRoi)}">${mWag ? gradeOf(mRoi) : '–'}</span></div><p class="pf-pl ${mPL<0?'neg':''}">${money(mPL)}</p><p>Average of the four models’ $5 cards (10 bets a week each)</p><p>ROI ${(100*mRoi).toFixed(1)}% on $${mWag.toFixed(0)} wagered</p></div>
+      </div>` : '';
+    // this week's board
+    let board = '';
+    if (!SL || !SL.games || !SL.games.length){ board = '<p class="cmp-note">No upcoming games in the data right now.</p>'; }
+    else {
+      const top = new Set(AP.top), now = Date.now(), scope = document.getElementById('pkScope').value;
+      const locked = new Map(PICKS.filter(p=>p.week === SL.week).map(p=>[pkey(p.week,p.h,p.a), p.side]));
+      const games = SL.games.filter(g=>g.hF && g.aF && g.sp !== null && g.sp !== undefined && (scope === 'all' || top.has(g.h) || top.has(g.a) || locked.has(pkey(SL.week,g.h,g.a))));
+      const rows = games.map(g=>{
+        const k = pkey(SL.week, g.h, g.a), lk = locked.get(k), started = g.done || new Date(g.t).getTime() <= now;
+        const sel = chosen.get(k);
+        let lean = '';
+        if (Object.keys(PRE).length){ const ms = Object.keys(PRE).map(s=>sysMargin(s, g)); const p = ms.reduce((a,b)=>a+b,0)/ms.length; const gap = p + g.sp; if (Math.abs(gap) >= 0.05) lean = ` · Models lean ${esc(gap > 0 ? g.h : g.a)} by ${Math.abs(gap).toFixed(1)}`; }
+        const btn = side => {
+          const isLocked = lk === side, isSel = sel === side;
+          const dis = lk || started ? ' disabled' : '';
+          const cls = isLocked ? 'pk-b locked' : isSel ? 'pk-b on' : 'pk-b';
+          return `<button class="${cls}" data-k="${esc(k)}" data-side="${esc(side)}" aria-pressed="${isSel||isLocked}"${dis}>${isLocked ? '🔒 ' : ''}${sideLineTxt(g, side)}</button>`;
+        };
+        const status = lk ? (g.done ? `Locked in · Final ${g.ap}–${g.hp}` : 'Locked in') : started ? (g.done ? `Final ${g.ap}–${g.hp}` : 'Started') : new Date(g.t).toLocaleString('en-US', {weekday:'short', hour:'numeric', minute:'2-digit'});
+        return `<div class="pk-row${lk ? ' is-locked' : ''}"><div class="pk-match"><b>${esc(g.a)} ${g.n?'vs.':'at'} ${esc(g.h)}</b><small>${status}${lean}</small></div><div class="pk-btns">${btn(g.a)}${btn(g.h)}</div></div>`;
+      }).join('');
+      board = rows || '<p class="cmp-note">No games match this filter.</p>';
+    }
+    // history
+    let hist = '';
+    if (weeks.length){
+      const RMweeks = weeks;
+      let cu = 0, cm = 0; const sMe = [], sMod = [];
+      for (const w of RMweeks){ cu += byWeek[w].pl; const m = modelAvgWeek(w); cm += m ? m.pl : 0; sMe.push(cu); sMod.push(cm); }
+      const chart = lineChart(RMweeks, [{l:'Your picks', c:'var(--ink)', s:sMe, wdt:3}, {l:'Model average', c:'var(--muted)', s:sMod, wdt:2, dash:true}]);
+      const rowsH = RMweeks.map((w,i)=>{ const s = byWeek[w], m = modelAvgWeek(w); return `<tr><td>${w}</td><td class="n"><span class="${s.pl<0?'neg':'pos'}">${money(s.pl)}</span><small>${s.w}-${s.l}${s.p?'-'+s.p:''}${s.o?`, ${s.o} open`:''} · total ${money(sMe[i])}</small></td><td class="n">${m ? `<span class="${m.pl<0?'neg':'pos'}">${money(m.pl)}</span><small>total ${money(sMod[i])}</small>` : '—'}</td></tr>`; }).join('');
+      const items = RMweeks.slice().reverse().map(w=>byWeek[w].items.map(p=>`<tr class="${p.res==='L'?'l':''}"><td>${w}</td><td>${esc(p.a)} ${p.n?'vs.':'at'} ${esc(p.h)}</td><td>${sideLineTxt(p, p.side)}</td><td class="n">${p.res==='pending'?'Open':p.res==='W'?'Won '+money(WIN_PAY):p.res==='L'?'Lost '+money(-STAKE):'Push $0.00'}</td></tr>`).join('')).join('');
+      hist = `<h4 class="cmp-h">Your picks vs. the models</h4>${chart}
+        <div class="tablebox"><table class="pf-table"><thead><tr><th>Week</th><th class="n">Your picks</th><th class="n">Model average</th></tr></thead><tbody>${rowsH}</tbody></table></div>
+        <h4 class="cmp-h">Every pick</h4><div class="tablebox"><table><thead><tr><th>Week</th><th>Game</th><th>Pick</th><th class="n">Result</th></tr></thead><tbody>${items}</tbody></table></div>`;
+    }
+    out.innerHTML = `${summary}
+      <h4 class="cmp-h">${SL ? `Week ${SL.week} board` : 'This week'}</h4>
+      <p class="cmp-note">Tap a side to select it, then lock in your picks below. Each pick is a $5 bet at −110 against the line shown, and it can’t be changed once submitted. Games lock at kickoff.</p>
+      <div class="pk-board">${board}</div>
+      ${hist || '<p class="cmp-note" style="margin-top:16px">No picks yet. Your record and the comparison with the models will appear here after your first week.</p>'}`;
+    renderPickBar();
+  }
+  function lineChart(ws, series){
+    const W = 640, H = 260, L = 52, R = 118, Tp = 14, B = 28;
+    let lo = 0, hi = 0; for (const s of series) for (const v of s.s){ lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    const pad = Math.max(5, (hi-lo)*0.1); lo -= pad; hi += pad;
+    const x = i => L + (W-L-R) * (ws.length === 1 ? 0.5 : i/(ws.length-1));
+    const y = v => Tp + (H-Tp-B) * (hi - v)/(hi - lo);
+    const raw = (hi-lo)/5, mag = Math.pow(10, Math.floor(Math.log10(raw))), step = [1,2,5,10].map(m=>m*mag).find(s=>s >= raw);
+    let g = '';
+    for (let v = Math.ceil(lo/step)*step; v <= hi; v += step) g += `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${money(v).replace('.00','')}</text>`;
+    g += `<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink)" stroke-width="1"/>`;
+    ws.forEach((w,i)=>{ g += `<text x="${x(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--muted)">${w}</text>`; });
+    const labels = [];
+    for (const s of series){
+      g += `<polyline points="${s.s.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${s.c}" stroke-width="${s.wdt}" ${s.dash?'stroke-dasharray="6 4"':''} stroke-linejoin="round"/>`;
+      s.s.forEach((v,i)=>{ g += `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${s.c}"><title>${s.l}, week ${ws[i]}: ${money(v)}</title></circle>`; });
+      labels.push({l:s.l, c:s.c, y:y(s.s[s.s.length-1]), v:s.s[s.s.length-1]});
+    }
+    labels.sort((p,q)=>p.y-q.y);
+    for (let i=1;i<labels.length;i++) if (labels[i].y - labels[i-1].y < 13) labels[i].y = labels[i-1].y + 13;
+    for (const lb of labels) g += `<text x="${W-R+8}" y="${lb.y+4}" font-size="11" font-weight="600" fill="${lb.c}">${lb.l} ${money(lb.v)}</text>`;
+    return `<div class="tablebox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative returns by week" style="width:100%;min-width:500px;height:auto;display:block;font-family:Barlow,system-ui,sans-serif">${g}</svg></div><p class="cmp-note">Running total after each week. Week numbers along the bottom.</p>`;
+  }
+  function renderPickBar(){
+    const bar = document.getElementById('pkBar');
+    const n = chosen.size;
+    document.getElementById('pkCount').textContent = n ? `${n} pick${n===1?'':'s'} selected ($${(n*STAKE).toFixed(0)})` : 'No picks selected';
+    document.getElementById('pkSubmit').disabled = !n || !!OPTS.readOnly;
+    if (OPTS.readOnly) document.getElementById('pkMsg').textContent = 'Picks save to your GitHub repo, so submitting works on your GitHub site, not in this preview.';
+    const tk = storedToken(); const pw = document.getElementById('pkPw');
+    if (tk && !pw.value) pw.placeholder = 'Saved on this device';
+    bar.hidden = false;
+  }
+  async function submitPicks(){
+    const msg = document.getElementById('pkMsg');
+    const pw = document.getElementById('pkPw');
+    const token = pw.value.trim() || storedToken();
+    if (!token){ msg.textContent = 'Enter your password to lock in picks.'; return; }
+    if (!SL){ return; }
+    const now = Date.now();
+    const pending = [];
+    for (const [k, side] of chosen){
+      const g = SL.games.find(x=>pkey(SL.week, x.h, x.a) === k);
+      if (!g || g.done || new Date(g.t).getTime() <= now){ chosen.delete(k); continue; }
+      pending.push({week:SL.week, h:g.h, a:g.a, n:g.n, side, sp:g.sp, t:g.t, at:new Date().toISOString()});
+    }
+    if (!pending.length){ msg.textContent = 'Those games have already started.'; renderPicks(); return; }
+    if (typeof confirm === 'function' && !confirm(`Lock in ${pending.length} pick${pending.length===1?'':'s'}? Picks can’t be changed after this.`)) return;
+    const btn = document.getElementById('pkSubmit'); btn.disabled = true; msg.textContent = 'Saving…';
+    try {
+      for (let attempt = 0; attempt < 2; attempt++){
+        const cur = await readPicksFile(token);
+        if (cur.error === 401 || cur.error === 403){ msg.textContent = 'That password wasn’t accepted. Check the token’s access to this repo.'; btn.disabled = false; return; }
+        if (cur.error){ throw new Error('read ' + cur.error); }
+        const have = new Set(cur.picks.map(p=>pkey(p.week, p.h, p.a)));
+        const add = pending.filter(p=>!have.has(pkey(p.week, p.h, p.a)));
+        const merged = cur.picks.concat(add);
+        const body = {message:`Picks for week ${SL.week}: ${add.map(p=>p.side).join(', ') || 'none new'}`, content:b64enc(JSON.stringify({picks:merged}, null, 1) + '\n'), branch:BRANCH};
+        if (cur.sha) body.sha = cur.sha;
+        const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${PICKS_PATH}`, {method:'PUT', headers:{Accept:'application/vnd.github+json', Authorization:'Bearer ' + token, 'Content-Type':'application/json'}, body:JSON.stringify(body)});
+        if (r.status === 409 && attempt === 0) continue;
+        if (r.status === 401 || r.status === 403 || r.status === 404){ msg.textContent = 'That password wasn’t accepted. Check the token’s access to this repo.'; btn.disabled = false; return; }
+        if (!r.ok) throw new Error('write ' + r.status);
+        PICKS = merged; chosen.clear();
+        if (document.getElementById('pkRemember').checked){ try { localStorage.setItem(TOKEN_KEY, token); } catch(e){} }
+        pw.value = '';
+        msg.textContent = `Locked in ${add.length} pick${add.length===1?'':'s'}.`;
+        renderPicks();
+        return;
+      }
+      throw new Error('conflict');
+    } catch(e){
+      msg.textContent = 'Couldn’t save picks. Check your connection and try again.';
+      btn.disabled = false;
+    }
+  }
+
   // ---- Compare view ----
   const VARIANTS = [
     {g:'Recursive', l:'Quality weight 70% (default)', m:'rec', w:0.7},
@@ -842,6 +1082,16 @@ function startApp(DATA){
   prepSpreads();
   snapAll();
   for (const el of [spModel, spSort, spScope]) el.addEventListener('change', renderSpreads);
+  document.getElementById('pkOut').addEventListener('click', e=>{
+    const b = e.target.closest('.pk-b'); if (!b || b.disabled) return;
+    const k = b.dataset.k, side = b.dataset.side;
+    if (chosen.get(k) === side) chosen.delete(k); else chosen.set(k, side);
+    renderPicks();
+  });
+  document.getElementById('pkScope').addEventListener('change', renderPicks);
+  document.getElementById('pkSubmit').addEventListener('click', submitPicks);
+  document.getElementById('pkForget').addEventListener('click', ()=>{ try { localStorage.removeItem(TOKEN_KEY); } catch(e){} document.getElementById('pkPw').placeholder = 'Password'; document.getElementById('pkMsg').textContent = 'Password removed from this device.'; });
+  loadPicks().then(()=>{ if (!document.getElementById('viewK').hidden) renderPicks(); });
   {
     const ws = perfWeeks();
     pwSel.innerHTML = ws.slice().reverse().map(w=>`<option value="${w}">Week ${w}</option>`).join('');
@@ -860,7 +1110,7 @@ function startApp(DATA){
   document.getElementById('cswap').addEventListener('click', ()=>{ const x = selA.value; selA.value = selB.value; selB.value = x; renderCompare(); });
 
   // ---- Tabs ----
-  const VIEWS = {rankings:['viewR','tabR'], compare:['viewC','tabC'], movers:['viewM','tabM'], spreads:['viewS','tabS'], performance:['viewP','tabP']};
+  const VIEWS = {rankings:['viewR','tabR'], compare:['viewC','tabC'], movers:['viewM','tabM'], spreads:['viewS','tabS'], performance:['viewP','tabP'], picks:['viewK','tabK']};
   function showView(v){
     if (!VIEWS[v]) v = 'rankings';
     for (const k in VIEWS){
@@ -872,18 +1122,19 @@ function startApp(DATA){
     if (v === 'movers') renderMovers();
     if (v === 'spreads') renderSpreads();
     if (v === 'performance') renderPerf();
+    if (v === 'picks') renderPicks();
   }
   const hashView = () => (typeof location !== 'undefined' && VIEWS[location.hash.slice(1)]) ? location.hash.slice(1) : 'rankings';
   const go = v => { if (typeof location !== 'undefined') location.hash = v; showView(v); };
   for (const k in VIEWS) document.getElementById(VIEWS[k][1]).addEventListener('click', ()=>go(k));
   if (typeof window.addEventListener === 'function') window.addEventListener('hashchange', ()=>showView(hashView()));
-  window.__dbg = {T, HIST, PRE, BT, renderPerf, renderSpreads, renderMovers, renderCompare, selA, selB, SNAP, showView, S, avgSOS, get all(){return all}, get mean(){return mean}, set(m,w){method=m;weight=w;render();}};
+  window.__dbg = {T, HIST, PRE, BT, renderPerf, renderPicks, chosen, setPicks(p){PICKS=p;picksLoaded=true;}, pickStats, renderSpreads, renderMovers, renderCompare, selA, selB, SNAP, showView, S, avgSOS, get all(){return all}, get mean(){return mean}, set(m,w){method=m;weight=w;render();}};
   render();
   showView(hashView());
 }
 fetch('data.json', {cache: 'no-store'})
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(startApp)
+  .then(d => startApp(d))
   .catch(err => {
     console.error(err);
     document.getElementById('list').innerHTML = '<li class="empty">Couldn’t load data.json. Run the “Update rankings data” workflow, then reload this page.</li>';
