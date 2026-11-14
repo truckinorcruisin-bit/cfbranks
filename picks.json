@@ -39,6 +39,28 @@
    "sp": -3,
    "t": "2026-11-14T23:15:00.000Z",
    "at": "2026-11-14T21:23:28.989Z"
+  },
+  {
+   "week": 11,
+   "h": "SMU",
+   "a": "Wake Forest",
+   "n": false,
+   "side": "Wake Forest",
+   "sp": -2.5,
+   "t": "2026-11-14T17:00:00.000Z",
+   "at": "2026-11-14T21:39:52.000Z",
+   "note": "Entered manually after kickoff. Picked before kickoff per the user; no timestamp from the time of the pick."
+  },
+  {
+   "week": 11,
+   "h": "Texas A&M",
+   "a": "Tennessee",
+   "n": false,
+   "side": "Tennessee",
+   "sp": 1,
+   "t": "2026-11-14T20:00:00.000Z",
+   "at": "2026-11-14T21:39:52.000Z",
+   "note": "Entered manually after kickoff. Picked before kickoff per the user; no timestamp from the time of the pick."
   }
  ]
 }
