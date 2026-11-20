@@ -44,7 +44,7 @@ header h1 span{display:block;font-weight:600;font-size:.42em;letter-spacing:0;co
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--turf)}
 .cmp-pick{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:20px 0 14px}
 .cmp-pick label{flex:1 1 150px;display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:var(--muted)}
-.cmp-pick select,.cmp-pick button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:44px}
+.cmp-pick select,.cmp-pick button,.cmp-pick input[type=search]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;min-height:44px}
 .cmp-pick button{cursor:pointer;flex:0 0 auto;font-weight:600}
 .cmp-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .cmp-card{background:var(--surface);border:1px solid var(--rule);border-top:4px solid var(--turf);border-radius:6px;padding:12px 14px}
@@ -225,6 +225,7 @@ td .res{font-weight:600}
   <div class="cmp-pick">
     <label>Model<select id="spm"><option value="all">Consensus of all four</option><option value="rec">Recursive</option><option value="cnt">Opponent wins + schedule</option><option value="elo">Elo</option><option value="mine">My rank</option></select></label>
     <label>Sort<select id="sps"><option value="gap">Biggest variance first</option><option value="time">Kickoff time</option></select></label>
+    <label>Search team<input id="spq" type="search" placeholder="e.g. Texas" aria-label="Search for a team" autocomplete="off"></label>
     <label>Games<select id="spg"><option value="all">All FBS games</option><option value="top25">Involving an AP Top 25 team</option></select></label>
   </div>
   <div id="spOut"></div>
@@ -670,6 +671,7 @@ function startApp(DATA, appOptions){
   const fmtNum = x => String(Number(x.toFixed(2)));
   const lineTxt = (home, away, margin, exact) => Math.abs(margin) < 0.05 ? 'Pick ’em' : `${esc(margin > 0 ? home : away)} −${exact ? fmtNum(Math.abs(margin)) : Math.abs(margin).toFixed(1)}`;
   const spModel = document.getElementById('spm'), spSort = document.getElementById('sps'), spScope = document.getElementById('spg');
+  const spQuery = document.getElementById('spq');
   function sysMargin(k, g){ const P = PRE[k]; return P.b*(P.pts[g.h] - P.pts[g.a]) + (g.n ? 0 : P.h); }
   function renderSpreads(){
     const out = document.getElementById('spOut');
@@ -682,6 +684,8 @@ function startApp(DATA, appOptions){
       if (!(g.hF && g.aF)){ skippedFCS++; continue; }
       if (g.sp === null || g.sp === undefined) continue;
       if (spScope.value === 'top25' && !(top.has(g.h) || top.has(g.a))) continue;
+      const q = spQuery.value.trim().toLowerCase();
+      if (q && !(g.h.toLowerCase().includes(q) || g.a.toLowerCase().includes(q))) continue;
       const m = -g.sp;
       const ms = keys.map(k=>sysMargin(k, g));
       const p = ms.reduce((s,v)=>s+v,0)/ms.length;
@@ -1082,6 +1086,7 @@ function startApp(DATA, appOptions){
   prepSpreads();
   snapAll();
   for (const el of [spModel, spSort, spScope]) el.addEventListener('change', renderSpreads);
+  spQuery.addEventListener('input', renderSpreads);
   document.getElementById('pkOut').addEventListener('click', e=>{
     const b = e.target.closest('.pk-b'); if (!b || b.disabled) return;
     const k = b.dataset.k, side = b.dataset.side;
