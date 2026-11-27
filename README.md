@@ -57,6 +57,14 @@ Each run makes 5 API calls during the regular season (games and rankings for the
 
 The season is picked automatically (July onward counts as the new season). To pin one, add a repository **variable** (not a secret) named `SEASON`, for example `2026`.
 
+## If a run fails
+
+The workflow has two jobs: **build** (refresh `data.json`, commit it, package the site) and **deploy** (publish to Pages). Deploy retries itself twice, after 30 seconds and then 90 seconds, to ride out the occasional "No artifacts named github-pages were found" error. If a run still fails:
+
+- Check whether the failed step is under **build** or **deploy**. A failed deploy doesn't lose anything: the data is already committed, and the site updates on the next run.
+- To fix it sooner, open the run and click **Re-run failed jobs**, or start **Update rankings data** again with **Run workflow**.
+- Also check https://www.githubstatus.com for Actions or Pages incidents.
+
 ## Run it locally
 
 ```bash
